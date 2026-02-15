@@ -6,17 +6,47 @@
   <title>Telegram Clicker Game</title>
   <style>
     /* ============================================================================
-       LIQUID GLASS DESIGN - Жидкое стекло с анимациями (Premium)
+       CASTILI PUCCINI DESIGN SYSTEM - Luxury Digital Experience
        ============================================================================ */
     
     :root {
-      --primary-gradient: linear-gradient(135deg, #00c6ff, #0072ff);
-      --secondary-gradient: linear-gradient(135deg, #f093fb, #f5576c);
-      --glass-bg: rgba(255, 255, 255, 0.05);
-      --glass-border: rgba(255, 255, 255, 0.1);
-      --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-      --text-main: #ffffff;
-      --text-secondary: rgba(255, 255, 255, 0.7);
+      /* Color Palette (WCAG AA Compliant) */
+      --cp-bg-primary: #0a0a12;
+      --cp-bg-secondary: #161625;
+      --cp-bg-glass: rgba(22, 22, 37, 0.7);
+      
+      --cp-text-primary: #ffffff;
+      --cp-text-secondary: #b0b0c0;
+      --cp-text-accent: #ffd700;
+      
+      --cp-brand-gold: #ffd700;
+      --cp-brand-gold-dim: rgba(255, 215, 0, 0.2);
+      --cp-brand-blue: #0072ff;
+      --cp-brand-gradient: linear-gradient(135deg, #ffd700, #fdb931);
+      
+      --cp-status-success: #4caf50;
+      --cp-status-error: #ff4d4d;
+      --cp-status-warning: #ff9800;
+
+      /* Typography */
+      --cp-font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --cp-line-height: 1.5;
+      
+      /* Spacing & Layout */
+      --cp-radius-sm: 8px;
+      --cp-radius-md: 16px;
+      --cp-radius-lg: 24px;
+      --cp-radius-full: 9999px;
+      
+      /* Animation */
+      --cp-transition-default: all 0.2s ease-in-out;
+      
+      /* Z-Index */
+      --z-background: -1;
+      --z-content: 1;
+      --z-nav: 100;
+      --z-modal: 1000;
+      --z-toast: 2000;
     }
 
     * {
@@ -27,13 +57,21 @@
     }
 
     body {
-      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0f0c29;
-      color: var(--text-main);
+      font-family: var(--cp-font-family);
+      background: var(--cp-bg-primary);
+      color: var(--cp-text-primary);
+      line-height: var(--cp-line-height);
       min-height: 100vh;
       overflow-x: hidden;
       position: relative;
     }
+
+    /* Typography Scale */
+    h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.02em; }
+    h2 { font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 700; letter-spacing: -0.01em; }
+    h3 { font-size: clamp(1.25rem, 3vw, 1.75rem); font-weight: 600; }
+    p { font-size: 1rem; color: var(--cp-text-secondary); }
+    small { font-size: 0.875rem; color: var(--cp-text-secondary); }
 
     /* Animated Liquid Background */
     .liquid-background {
@@ -42,44 +80,35 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      z-index: -1;
+      z-index: var(--z-background);
       overflow: hidden;
-      background: linear-gradient(45deg, #1a1a2e, #16213e);
+      background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%);
     }
 
     .blob {
       position: absolute;
       border-radius: 50%;
       filter: blur(80px);
-      opacity: 0.6;
+      opacity: 0.4;
       animation: float-blob 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .blob:nth-child(1) {
-      top: -10%;
-      left: -10%;
-      width: 50vw;
-      height: 50vw;
-      background: #4facfe;
+      top: -10%; left: -10%; width: 50vw; height: 50vw;
+      background: var(--cp-brand-blue);
       animation-delay: 0s;
     }
 
     .blob:nth-child(2) {
-      bottom: -10%;
-      right: -10%;
-      width: 60vw;
-      height: 60vw;
-      background: #f093fb;
+      bottom: -10%; right: -10%; width: 60vw; height: 60vw;
+      background: #7928ca;
       animation-delay: -5s;
     }
 
     .blob:nth-child(3) {
-      top: 40%;
-      left: 40%;
-      width: 40vw;
-      height: 40vw;
-      background: #00f260;
-      opacity: 0.4;
+      top: 40%; left: 40%; width: 40vw; height: 40vw;
+      background: var(--cp-brand-gold);
+      opacity: 0.2;
       animation-delay: -10s;
     }
 
@@ -88,25 +117,25 @@
       100% { transform: translate(30px, 50px) scale(1.1); }
     }
 
-    /* Container */
-    #app {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-      padding-bottom: 100px; /* Space for nav */
-      min-height: 100vh;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* Glassmorphism Utilities */
+    /* Glass Component */
     .glass-panel {
-      background: var(--glass-bg);
+      background: var(--cp-bg-glass);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow);
-      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      border-radius: var(--cp-radius-lg);
+    }
+
+    /* Container */
+    #app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      padding-bottom: 100px;
+      min-height: 100vh;
+      position: relative;
+      z-index: var(--z-content);
     }
 
     /* Navigation */
@@ -226,13 +255,20 @@
     }
 
     .stat-card {
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
       border-radius: 20px;
       padding: 15px;
       text-align: center;
-      transition: transform 0.3s ease;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
 
     .stat-card:active {
@@ -417,7 +453,9 @@
 
     .shop-item {
       background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
       border-radius: 20px;
       padding: 15px;
       display: flex;
@@ -431,7 +469,7 @@
     .shop-item:hover {
       background: rgba(255, 255, 255, 0.1);
       transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
 
     .item-name {
@@ -554,6 +592,221 @@
     // ============================================================================
     // Core Modules
     // ============================================================================
+
+    const translations = {
+      en: {
+        app_title: 'Castili Puccini',
+        loading: 'Loading...',
+        nav_game: 'Game',
+        nav_shop: 'Shop',
+        nav_profile: 'Profile',
+        nav_leaderboard: 'Ranking',
+        nav_achievements: 'Awards',
+        stat_size: 'Size',
+        stat_currency: 'Currency',
+        stat_clicks: 'Clicks',
+        stat_playtime: 'Play Time',
+        stat_purchases: 'Purchases',
+        stat_cases: 'Cases',
+        stat_rank: 'Rank',
+        btn_buy: 'Buy',
+        btn_insufficient: 'Insufficient',
+        btn_use: 'Use',
+        btn_share: 'Share Results',
+        shop_title: 'Boutique',
+        shop_currency: 'Your Balance:',
+        shop_timer: 'Refresh in:',
+        profile_stats: 'Statistics',
+        profile_active_boosts: 'Active Effects',
+        profile_antiboosts: 'Debuffs',
+        click_hint: 'Tap to Collect',
+        progress_next_level: 'Next Tier',
+        active_boosts: 'Active Boosts:',
+        warning_antiboosts: 'Debuffs Active! Check Profile.',
+        error_title: 'Error',
+        error_reload: 'Reload',
+        stat_total_players: 'Total Players',
+        stat_your_rank: 'Your Rank',
+        stat_unlocked: 'Unlocked',
+        filter_all: 'All',
+        filter_special: 'Special',
+        filter_cases: 'Cases'
+      },
+      ru: {
+        app_title: 'Castili Puccini',
+        loading: 'Загрузка...',
+        nav_game: 'Игра',
+        nav_shop: 'Бутик',
+        nav_profile: 'Профиль',
+        nav_leaderboard: 'Рейтинг',
+        nav_achievements: 'Награды',
+        stat_size: 'Размер',
+        stat_currency: 'Валюта',
+        stat_clicks: 'Клики',
+        stat_playtime: 'Время игры',
+        stat_purchases: 'Покупок',
+        stat_cases: 'Кейсов',
+        stat_rank: 'Ранг',
+        btn_buy: 'Купить',
+        btn_insufficient: 'Недостаточно',
+        btn_use: 'Использовать',
+        btn_share: 'Поделиться',
+        shop_title: 'Бутик',
+        shop_currency: 'Баланс:',
+        shop_timer: 'Обновление:',
+        profile_stats: 'Статистика',
+        profile_active_boosts: 'Активные эффекты',
+        profile_antiboosts: 'Дебаффы',
+        click_hint: 'Нажми',
+        progress_next_level: 'Следующий уровень',
+        active_boosts: 'Активные бусты:',
+        warning_antiboosts: 'Активны дебаффы! Проверьте профиль.',
+        error_title: 'Ошибка',
+        error_reload: 'Перезагрузить',
+        stat_total_players: 'Всего игроков',
+        stat_your_rank: 'Ваша позиция',
+        stat_unlocked: 'Разблокировано',
+        filter_all: 'Все',
+        filter_special: 'Особые',
+        filter_cases: 'Кейсы'
+      },
+      es: {
+        app_title: 'Castili Puccini',
+        loading: 'Cargando...',
+        nav_game: 'Juego',
+        nav_shop: 'Tienda',
+        nav_profile: 'Perfil',
+        nav_leaderboard: 'Ranking',
+        nav_achievements: 'Logros',
+        stat_size: 'Tamaño',
+        stat_currency: 'Divisa',
+        stat_clicks: 'Clics',
+        stat_playtime: 'Tiempo',
+        stat_purchases: 'Compras',
+        stat_cases: 'Cajas',
+        stat_rank: 'Rango',
+        btn_buy: 'Comprar',
+        btn_insufficient: 'Insuficiente',
+        btn_use: 'Usar',
+        btn_share: 'Compartir',
+        shop_title: 'Boutique',
+        shop_currency: 'Saldo:',
+        shop_timer: 'Actualizar:',
+        profile_stats: 'Estadísticas',
+        profile_active_boosts: 'Efectos Activos',
+        profile_antiboosts: 'Debuffs',
+        click_hint: 'Tocar',
+        progress_next_level: 'Siguiente Nivel',
+        active_boosts: 'Mejoras Activas:',
+        warning_antiboosts: '¡Debuffs Activos!',
+        error_title: 'Error',
+        error_reload: 'Recargar'
+      },
+      fr: {
+        app_title: 'Castili Puccini',
+        loading: 'Chargement...',
+        nav_game: 'Jeu',
+        nav_shop: 'Boutique',
+        nav_profile: 'Profil',
+        nav_leaderboard: 'Classement',
+        nav_achievements: 'Succès',
+        stat_size: 'Taille',
+        stat_currency: 'Devise',
+        stat_clicks: 'Clics',
+        stat_playtime: 'Temps',
+        stat_purchases: 'Achats',
+        stat_cases: 'Caisses',
+        stat_rank: 'Rang',
+        btn_buy: 'Acheter',
+        btn_insufficient: 'Insuffisant',
+        btn_use: 'Utiliser',
+        btn_share: 'Partager',
+        shop_title: 'Boutique',
+        shop_currency: 'Solde:',
+        shop_timer: 'Rafraîchir:',
+        profile_stats: 'Statistiques',
+        profile_active_boosts: 'Effets Actifs',
+        profile_antiboosts: 'Malus',
+        click_hint: 'Appuyez',
+        progress_next_level: 'Niveau Suivant',
+        active_boosts: 'Boosts Actifs:',
+        warning_antiboosts: 'Malus Actifs!',
+        error_title: 'Erreur',
+        error_reload: 'Recharger'
+      },
+      de: {
+        app_title: 'Castili Puccini',
+        loading: 'Laden...',
+        nav_game: 'Spiel',
+        nav_shop: 'Laden',
+        nav_profile: 'Profil',
+        nav_leaderboard: 'Rangliste',
+        nav_achievements: 'Erfolge',
+        stat_size: 'Größe',
+        stat_currency: 'Währung',
+        stat_clicks: 'Klicks',
+        stat_playtime: 'Spielzeit',
+        stat_purchases: 'Käufe',
+        stat_cases: 'Kisten',
+        stat_rank: 'Rang',
+        btn_buy: 'Kaufen',
+        btn_insufficient: 'Unzureichend',
+        btn_use: 'Verwenden',
+        btn_share: 'Teilen',
+        shop_title: 'Boutique',
+        shop_currency: 'Guthaben:',
+        shop_timer: 'Aktualisierung:',
+        profile_stats: 'Statistiken',
+        profile_active_boosts: 'Aktive Effekte',
+        profile_antiboosts: 'Debuffs',
+        click_hint: 'Tippen',
+        progress_next_level: 'Nächste Stufe',
+        active_boosts: 'Aktive Boosts:',
+        warning_antiboosts: 'Debuffs Aktiv!',
+        error_title: 'Fehler',
+        error_reload: 'Neu laden'
+      }
+    };
+
+    /**
+     * LanguageManager - Internationalization System
+     */
+    class LanguageManager {
+      constructor(stateManager) {
+        this.stateManager = stateManager;
+        this.currentLang = 'en';
+        this.supportedLangs = ['en', 'ru', 'es', 'fr', 'de'];
+        this.detectLanguage();
+      }
+
+      detectLanguage() {
+        // Try to get from URL params, then navigator, then default
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLang = urlParams.get('lang');
+        const navLang = navigator.language.split('-')[0];
+        
+        if (urlLang && this.supportedLangs.includes(urlLang)) {
+          this.setLanguage(urlLang);
+        } else if (this.supportedLangs.includes(navLang)) {
+          this.setLanguage(navLang);
+        } else {
+          this.setLanguage('en');
+        }
+      }
+
+      setLanguage(lang) {
+        if (this.supportedLangs.includes(lang)) {
+          this.currentLang = lang;
+          document.documentElement.lang = lang;
+          // Notify listeners if needed
+        }
+      }
+
+      t(key) {
+        const langData = translations[this.currentLang] || translations['en'];
+        return langData[key] || key;
+      }
+    }
 
     /**
      * StateManager - Центральное хранилище состояния игры
@@ -1140,10 +1393,11 @@
      * ClickerView - Главный экран
      */
     class ClickerView {
-      constructor(stateManager, eventBus, gameEngine) {
+      constructor(stateManager, eventBus, gameEngine, languageManager) {
         this.stateManager = stateManager;
         this.eventBus = eventBus;
         this.gameEngine = gameEngine;
+        this.languageManager = languageManager;
         this.container = null;
         
         this.visualThresholds = [
@@ -1166,6 +1420,7 @@
         this.container = container;
         const state = this.stateManager.getState();
         const player = state.player;
+        const t = (k) => this.languageManager.t(k);
         
         const visualLevel = this.getVisualLevel(player.size);
         
@@ -1173,16 +1428,16 @@
           <div class="clicker-container">
             <div class="player-info">
               ${player.avatar ? `<img src="${player.avatar}" alt="${player.name}" class="player-avatar">` : ''}
-              <h2 class="player-name">${player.name || 'Игрок'}</h2>
+              <h2 class="player-name">${player.name || 'Player'}</h2>
             </div>
             
             <div class="stats-container">
               <div class="stat-card">
-                <div class="stat-label">Размер</div>
+                <div class="stat-label">${t('stat_size')}</div>
                 <div class="stat-value" id="size-display">${this.formatNumber(player.size)}</div>
               </div>
               <div class="stat-card">
-                <div class="stat-label">Валюта</div>
+                <div class="stat-label">${t('stat_currency')}</div>
                 <div class="stat-value" id="currency-display">${this.formatNumber(player.currency)}</div>
               </div>
             </div>
@@ -1195,11 +1450,11 @@
               <button id="click-button" class="click-button" style="transform: scale(${visualLevel.scale})">
                 <span class="click-emoji">${visualLevel.emoji}</span>
               </button>
-              <div class="click-hint">Нажми меня!</div>
+              <div class="click-hint">${t('click_hint')}</div>
             </div>
             
             <div class="progress-container">
-              <div class="progress-label">До следующего уровня</div>
+              <div class="progress-label">${t('progress_next_level')}</div>
               <div class="progress-bar">
                 <div class="progress-fill" id="progress-fill" style="width: ${this.getProgressToNextLevel(player.size)}%"></div>
               </div>
@@ -1208,7 +1463,7 @@
             ${state.antiBoosts.length > 0 ? `
               <div class="antiboosts-warning">
                 <div class="warning-icon">⚠️</div>
-                <div class="warning-text">Активны антибусты! Используйте их в профиле.</div>
+                <div class="warning-text">${t('warning_antiboosts')}</div>
               </div>
             ` : ''}
           </div>
@@ -1337,7 +1592,7 @@
         
         return `
           <div class="boosts-list">
-            <div class="boosts-title">Активные бусты:</div>
+            <div class="boosts-title">${this.languageManager.t('active_boosts')}</div>
             ${activeBoosts.map(boost => {
               const timeLeft = Math.ceil((boost.endTime - currentTime) / 1000);
               return `
@@ -2094,10 +2349,11 @@
      * ShopView - Экран магазина
      */
     class ShopView {
-      constructor(stateManager, eventBus, shopManager) {
+      constructor(stateManager, eventBus, shopManager, languageManager) {
         this.stateManager = stateManager;
         this.eventBus = eventBus;
         this.shopManager = shopManager;
+        this.languageManager = languageManager;
         this.container = null;
         this.updateTimerInterval = null;
       }
@@ -2110,17 +2366,18 @@
         const player = state.player;
         const items = this.shopManager.getCurrentItems();
         const timeUntilUpdate = this.shopManager.getTimeUntilNextUpdate();
+        const t = (k) => this.languageManager.t(k);
         
         container.innerHTML = `
           <div class="shop-container">
             <div class="shop-header">
-              <h2 class="shop-title">🛒 Магазин</h2>
+              <h2 class="shop-title">🛒 ${t('shop_title')}</h2>
               <div class="shop-currency">
-                <span>Ваша валюта: </span>
+                <span>${t('shop_currency')} </span>
                 <span class="currency-value" id="shop-currency">${this.formatNumber(player.currency)}</span>
               </div>
               <div class="shop-timer">
-                Обновление через: <span id="shop-timer">${this.formatTime(timeUntilUpdate)}</span>
+                ${t('shop_timer')} <span id="shop-timer">${this.formatTime(timeUntilUpdate)}</span>
               </div>
             </div>
             
@@ -2136,6 +2393,7 @@
 
       renderItem(item, currency) {
         const canAfford = currency >= item.price;
+        const t = (k) => this.languageManager.t(k);
         return `
           <div class="shop-item ${!canAfford ? 'shop-item-disabled' : ''}">
             <div class="item-header">
@@ -2146,7 +2404,7 @@
             <div class="item-footer">
               <span class="item-price">💰 ${this.formatNumber(item.price)}</span>
               <button class="item-buy-button" data-id="${item.shopId}" ${!canAfford ? 'disabled' : ''}>
-                ${canAfford ? 'Купить' : 'Недостаточно'}
+                ${canAfford ? t('btn_buy') : t('btn_insufficient')}
               </button>
             </div>
           </div>
@@ -2211,11 +2469,12 @@
      * ProfileView - Экран профиля
      */
     class ProfileView {
-      constructor(stateManager, eventBus, leaderboardManager, achievementManager) {
+      constructor(stateManager, eventBus, leaderboardManager, achievementManager, languageManager) {
         this.stateManager = stateManager;
         this.eventBus = eventBus;
         this.leaderboardManager = leaderboardManager;
         this.achievementManager = achievementManager;
+        this.languageManager = languageManager;
       }
 
       render(container) {
@@ -2224,57 +2483,58 @@
         const rank = this.leaderboardManager.getPlayerRank(player.id) || 'N/A';
         const unlockedCount = this.achievementManager.getUnlockedCount();
         const totalCount = this.achievementManager.getTotalCount();
+        const t = (k) => this.languageManager.t(k);
         
         container.innerHTML = `
           <div class="profile-container">
             <div class="profile-header">
               ${player.avatar ? `<img src="${player.avatar}" class="profile-avatar">` : 
                 `<div class="profile-avatar-placeholder">👤</div>`}
-              <h2 class="profile-name">${player.name || 'Игрок'}</h2>
-              <div class="profile-rank">Позиция в рейтинге: #${rank}</div>
+              <h2 class="profile-name">${player.name || 'Player'}</h2>
+              <div class="profile-rank">${t('stat_your_rank')}: #${rank}</div>
             </div>
             
             <div class="card">
-              <h3 class="section-title">📊 Статистика</h3>
+              <h3 class="section-title">📊 ${t('profile_stats')}</h3>
               <div class="stats-grid">
                 <div class="stat-card">
                   <div class="stat-icon">📏</div>
-                  <div class="stat-label">Размер</div>
+                  <div class="stat-label">${t('stat_size')}</div>
                   <div class="stat-value">${this.formatNumber(player.size)}</div>
                 </div>
                 <div class="stat-card">
                   <div class="stat-icon">💰</div>
-                  <div class="stat-label">Валюта</div>
+                  <div class="stat-label">${t('stat_currency')}</div>
                   <div class="stat-value">${this.formatNumber(player.currency)}</div>
                 </div>
                 <div class="stat-card">
                   <div class="stat-icon">👆</div>
-                  <div class="stat-label">Клики</div>
+                  <div class="stat-label">${t('stat_clicks')}</div>
                   <div class="stat-value">${this.formatNumber(player.totalClicks)}</div>
                 </div>
                 <div class="stat-card">
                   <div class="stat-icon">⏱️</div>
-                  <div class="stat-label">Время игры</div>
+                  <div class="stat-label">${t('stat_playtime')}</div>
                   <div class="stat-value">${this.formatPlayTime(player.playTime)}</div>
                 </div>
                 <div class="stat-card">
                   <div class="stat-icon">🛒</div>
-                  <div class="stat-label">Покупок</div>
+                  <div class="stat-label">${t('stat_purchases')}</div>
                   <div class="stat-value">${state.statistics.itemsPurchased || 0}</div>
                 </div>
                 <div class="stat-card">
                   <div class="stat-icon">📦</div>
-                  <div class="stat-label">Кейсов</div>
+                  <div class="stat-label">${t('stat_cases')}</div>
                   <div class="stat-value">${state.statistics.casesOpened || 0}</div>
                 </div>
                 <div class="stat-card">
                   <div class="stat-icon">⭐</div>
-                  <div class="stat-label">Достижения</div>
+                  <div class="stat-label">${t('nav_achievements')}</div>
                   <div class="stat-value">${unlockedCount}/${totalCount}</div>
                 </div>
                 <div class="stat-card">
                   <div class="stat-icon">🏆</div>
-                  <div class="stat-label">Рейтинг</div>
+                  <div class="stat-label">${t('stat_rank')}</div>
                   <div class="stat-value">#${rank}</div>
                 </div>
               </div>
@@ -2282,7 +2542,7 @@
             
             ${state.boosts.length > 0 ? `
               <div class="card">
-                <h3 class="section-title">⚡ Активные бусты</h3>
+                <h3 class="section-title">⚡ ${t('profile_active_boosts')}</h3>
                 ${state.boosts.map(boost => `
                   <div class="boost-item">
                     <span>x${boost.multiplier.toFixed(1)}</span>
@@ -2294,11 +2554,11 @@
             
             ${state.antiBoosts.length > 0 ? `
               <div class="card">
-                <h3 class="section-title">⚠️ Антибусты</h3>
+                <h3 class="section-title">⚠️ ${t('profile_antiboosts')}</h3>
                 ${state.antiBoosts.map(ab => `
                   <div class="boost-item">
                     <span>${ab.type}</span>
-                    <button class="button" onclick="window.app.useAntiBoost('${ab.id}')">Использовать</button>
+                    <button class="button" onclick="window.app.useAntiBoost('${ab.id}')">${t('btn_use')}</button>
                   </div>
                 `).join('')}
               </div>
@@ -2307,7 +2567,7 @@
             <div class="profile-actions">
               <button class="action-button" onclick="window.app.shareScore()">
                 <span>📤</span>
-                <span>Поделиться результатами</span>
+                <span>${t('btn_share')}</span>
               </button>
             </div>
           </div>
@@ -2341,10 +2601,11 @@
      * LeaderboardView - Экран рейтинга
      */
     class LeaderboardView {
-      constructor(stateManager, eventBus, leaderboardManager) {
+      constructor(stateManager, eventBus, leaderboardManager, languageManager) {
         this.stateManager = stateManager;
         this.eventBus = eventBus;
         this.leaderboardManager = leaderboardManager;
+        this.languageManager = languageManager;
       }
 
       render(container) {
@@ -2352,19 +2613,20 @@
         const player = state.player;
         const leaderboard = this.leaderboardManager.getLeaderboard(100);
         const playerRank = this.leaderboardManager.getPlayerRank(player.id);
+        const t = (k) => this.languageManager.t(k);
         
         container.innerHTML = `
           <div class="leaderboard-container">
             <div class="leaderboard-header">
-              <h2 class="leaderboard-title">🏆 Рейтинг</h2>
+              <h2 class="leaderboard-title">🏆 ${t('nav_leaderboard')}</h2>
               <div class="leaderboard-stats">
-                <span>Всего игроков: ${leaderboard.length}</span>
+                <span>${t('stat_total_players')}: ${leaderboard.length}</span>
               </div>
             </div>
             
             ${playerRank ? `
               <div class="player-rank-card">
-                <div>Ваша позиция</div>
+                <div>${t('stat_your_rank')}</div>
                 <div class="rank-value">#${playerRank}</div>
               </div>
             ` : ''}
@@ -2404,10 +2666,11 @@
      * AchievementsView - Экран достижений
      */
     class AchievementsView {
-      constructor(stateManager, eventBus, achievementManager) {
+      constructor(stateManager, eventBus, achievementManager, languageManager) {
         this.stateManager = stateManager;
         this.eventBus = eventBus;
         this.achievementManager = achievementManager;
+        this.languageManager = languageManager;
         this.currentFilter = 'all';
       }
 
@@ -2415,13 +2678,14 @@
         const achievements = this.achievementManager.getAllAchievements();
         const unlocked = achievements.filter(a => a.unlocked).length;
         const total = achievements.length;
+        const t = (k) => this.languageManager.t(k);
         
         container.innerHTML = `
           <div class="achievements-container">
             <div class="achievements-header">
-              <h2 class="achievements-title">⭐ Достижения</h2>
+              <h2 class="achievements-title">⭐ ${t('nav_achievements')}</h2>
               <div class="achievements-progress">
-                <span>Разблокировано: ${unlocked}/${total}</span>
+                <span>${t('stat_unlocked')}: ${unlocked}/${total}</span>
                 <div class="progress-bar">
                   <div class="progress-fill" style="width: ${(unlocked/total*100).toFixed(0)}%"></div>
                 </div>
@@ -2430,22 +2694,22 @@
             
             <div class="achievements-filters">
               <button class="filter-button ${this.currentFilter === 'all' ? 'filter-active' : ''}" data-filter="all">
-                Все
+                ${t('filter_all')}
               </button>
               <button class="filter-button ${this.currentFilter === 'size' ? 'filter-active' : ''}" data-filter="size">
-                📏 Размер
+                📏 ${t('stat_size')}
               </button>
               <button class="filter-button ${this.currentFilter === 'clicks' ? 'filter-active' : ''}" data-filter="clicks">
-                👆 Клики
+                👆 ${t('stat_clicks')}
               </button>
               <button class="filter-button ${this.currentFilter === 'shop' ? 'filter-active' : ''}" data-filter="shop">
-                🛒 Магазин
+                🛒 ${t('nav_shop')}
               </button>
               <button class="filter-button ${this.currentFilter === 'cases' ? 'filter-active' : ''}" data-filter="cases">
-                📦 Кейсы
+                📦 ${t('filter_cases')}
               </button>
               <button class="filter-button ${this.currentFilter === 'special' ? 'filter-active' : ''}" data-filter="special">
-                ✨ Особые
+                ✨ ${t('filter_special')}
               </button>
             </div>
             
@@ -2499,6 +2763,7 @@
     class App {
       constructor() {
         this.stateManager = new StateManager();
+        this.languageManager = new LanguageManager(this.stateManager); // Init LanguageManager
         this.eventBus = new EventBus();
         this.storageManager = new StorageManager(this.stateManager);
         this.telegramBridge = new TelegramBridge();
@@ -2621,49 +2886,50 @@
       render() {
         const app = document.getElementById('app');
         const state = this.stateManager.getState();
+        const t = (k) => this.languageManager.t(k);
         
         app.innerHTML = `
           <nav class="nav">
             <button class="nav-button active" data-view="clicker">
               <span class="nav-icon">🎮</span>
-              <span class="nav-label">Игра</span>
+              <span class="nav-label">${t('nav_game')}</span>
             </button>
             <button class="nav-button" data-view="shop">
               <span class="nav-icon">🛒</span>
-              <span class="nav-label">Магазин</span>
+              <span class="nav-label">${t('nav_shop')}</span>
             </button>
             <button class="nav-button" data-view="profile">
               <span class="nav-icon">👤</span>
-              <span class="nav-label">Профиль</span>
+              <span class="nav-label">${t('nav_profile')}</span>
             </button>
             <button class="nav-button" data-view="leaderboard">
               <span class="nav-icon">🏆</span>
-              <span class="nav-label">Рейтинг</span>
+              <span class="nav-label">${t('nav_leaderboard')}</span>
             </button>
             <button class="nav-button" data-view="achievements">
               <span class="nav-icon">⭐</span>
-              <span class="nav-label">Достижения</span>
+              <span class="nav-label">${t('nav_achievements')}</span>
             </button>
           </nav>
 
           <div id="clicker-view" class="view active">
-            <div class="card"></div>
+            <div class="card glass-panel"></div>
           </div>
 
           <div id="shop-view" class="view">
-            <div class="card"></div>
+            <div class="card glass-panel"></div>
           </div>
 
           <div id="profile-view" class="view">
-            <div class="card"></div>
+            <div class="card glass-panel"></div>
           </div>
 
           <div id="leaderboard-view" class="view">
-            <div class="card"></div>
+            <div class="card glass-panel"></div>
           </div>
 
           <div id="achievements-view" class="view">
-            <div class="card"></div>
+            <div class="card glass-panel"></div>
           </div>
         `;
 
@@ -2681,11 +2947,11 @@
         this.achievementManager.loadUnlockedAchievements();
         
         // Инициализируем views
-        this.clickerView = new ClickerView(this.stateManager, this.eventBus, this.gameEngine);
-        this.shopView = new ShopView(this.stateManager, this.eventBus, this.shopManager);
-        this.profileView = new ProfileView(this.stateManager, this.eventBus, this.leaderboardManager, this.achievementManager);
-        this.leaderboardView = new LeaderboardView(this.stateManager, this.eventBus, this.leaderboardManager);
-        this.achievementsView = new AchievementsView(this.stateManager, this.eventBus, this.achievementManager);
+        this.clickerView = new ClickerView(this.stateManager, this.eventBus, this.gameEngine, this.languageManager);
+        this.shopView = new ShopView(this.stateManager, this.eventBus, this.shopManager, this.languageManager);
+        this.profileView = new ProfileView(this.stateManager, this.eventBus, this.leaderboardManager, this.achievementManager, this.languageManager);
+        this.leaderboardView = new LeaderboardView(this.stateManager, this.eventBus, this.leaderboardManager, this.languageManager);
+        this.achievementsView = new AchievementsView(this.stateManager, this.eventBus, this.achievementManager, this.languageManager);
         
         // Рендерим все views
         this.clickerView.render(document.querySelector('#clicker-view .card'));
