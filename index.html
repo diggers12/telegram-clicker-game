@@ -6,1395 +6,542 @@
   <title>Telegram Clicker Game</title>
   <style>
     /* ============================================================================
-       GLASSMORPHISM DESIGN - Жидкое стекло с анимациями
+       LIQUID GLASS DESIGN - Жидкое стекло с анимациями (Premium)
        ============================================================================ */
     
-    /* Reset and base styles */
+    :root {
+      --primary-gradient: linear-gradient(135deg, #00c6ff, #0072ff);
+      --secondary-gradient: linear-gradient(135deg, #f093fb, #f5576c);
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      --text-main: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-    }
-
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      33% { transform: translateY(-20px) rotate(5deg); }
-      66% { transform: translateY(-10px) rotate(-5deg); }
-    }
-
-    @keyframes glow {
-      0%, 100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.1); }
-      50% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.5), 0 0 60px rgba(255, 255, 255, 0.2); }
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #4facfe);
-      background-size: 400% 400%;
-      animation: gradientShift 15s ease infinite;
-      color: #ffffff;
-      overflow-x: hidden;
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0c29;
+      color: var(--text-main);
       min-height: 100vh;
-      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
       position: relative;
     }
 
-    /* Animated background particles */
-    body::before {
-      content: '';
+    /* Animated Liquid Background */
+    .liquid-background {
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
-      background: 
-        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-      animation: float 20s ease-in-out infinite;
-      pointer-events: none;
-      z-index: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      overflow: hidden;
+      background: linear-gradient(45deg, #1a1a2e, #16213e);
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.6;
+      animation: float-blob 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .blob:nth-child(1) {
+      top: -10%;
+      left: -10%;
+      width: 50vw;
+      height: 50vw;
+      background: #4facfe;
+      animation-delay: 0s;
+    }
+
+    .blob:nth-child(2) {
+      bottom: -10%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: #f093fb;
+      animation-delay: -5s;
+    }
+
+    .blob:nth-child(3) {
+      top: 40%;
+      left: 40%;
+      width: 40vw;
+      height: 40vw;
+      background: #00f260;
+      opacity: 0.4;
+      animation-delay: -10s;
+    }
+
+    @keyframes float-blob {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(30px, 50px) scale(1.1); }
     }
 
     /* Container */
     #app {
-      max-width: 1200px;
+      max-width: 800px;
       margin: 0 auto;
       padding: 20px;
+      padding-bottom: 100px; /* Space for nav */
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
       position: relative;
       z-index: 1;
     }
 
-    /* Navigation - Glassmorphism */
-    .nav {
-      display: flex;
-      justify-content: space-around;
-      background: rgba(255, 255, 255, 0.15);
+    /* Glassmorphism Utilities */
+    .glass-panel {
+      background: var(--glass-bg);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 25px;
-      padding: 12px;
-      margin-bottom: 20px;
-      position: sticky;
-      top: 10px;
-      z-index: 100;
-      gap: 8px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.3);
-      animation: slideDown 0.5s ease-out;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      border-radius: 24px;
     }
 
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    /* Navigation */
+    .nav {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 500px;
+      display: flex;
+      justify-content: space-around;
+      padding: 15px;
+      z-index: 1000;
+      background: rgba(20, 20, 40, 0.6);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
     }
 
     .nav-button {
-      flex: 1;
-      padding: 14px 10px;
       background: transparent;
       border: none;
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      border-radius: 18px;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      min-width: 44px;
-      min-height: 44px;
+      color: var(--text-secondary);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
       position: relative;
-      overflow: hidden;
-    }
-
-    .nav-button::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.3);
-      transform: translate(-50%, -50%);
-      transition: width 0.6s, height 0.6s;
-    }
-
-    .nav-button:hover::before {
-      width: 100%;
-      height: 100%;
-    }
-
-    .nav-button.active {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
-      color: #ffffff;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.4);
-      transform: translateY(-2px);
-    }
-
-    .nav-button:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: translateY(-2px);
-    }
-
-    .nav-button:active {
-      transform: translateY(0);
     }
 
     .nav-icon {
-      font-size: 22px;
-      position: relative;
-      z-index: 1;
-      animation: iconBounce 2s ease-in-out infinite;
-    }
-
-    @keyframes iconBounce {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
-
-    .nav-button.active .nav-icon {
-      animation: iconPulse 1s ease-in-out infinite;
-    }
-
-    @keyframes iconPulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.2); }
+      font-size: 24px;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .nav-label {
       font-size: 10px;
-      position: relative;
-      z-index: 1;
+      font-weight: 500;
     }
 
-    /* Views */
+    .nav-button.active {
+      color: #fff;
+    }
+
+    .nav-button.active .nav-icon {
+      transform: translateY(-5px) scale(1.2);
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    }
+
+    .nav-button.active::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #fff;
+    }
+
+    /* Views & Transitions */
     .view {
       display: none;
-      flex: 1;
+      animation: fadeIn 0.5s ease;
     }
 
     .view.active {
       display: block;
-      animation: viewFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    @keyframes viewFadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(30px) scale(0.95);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Card style - Enhanced Glassmorphism */
-    .card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
-      backdrop-filter: blur(30px) saturate(180%);
-      -webkit-backdrop-filter: blur(30px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 25px;
-      padding: 25px;
-      margin-bottom: 20px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.3),
-                  0 1px 0 rgba(0, 0, 0, 0.1);
-      position: relative;
-      overflow: hidden;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 3s infinite;
-    }
-
-    @keyframes shimmer {
-      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.4),
-                  0 1px 0 rgba(0, 0, 0, 0.1);
-    }
-
-    /* Button styles - Enhanced */
-    .button {
-      padding: 14px 28px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 18px;
-      color: #ffffff;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      min-width: 44px;
-      min-height: 44px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.3);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .button::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.4);
-      transform: translate(-50%, -50%);
-      transition: width 0.6s, height 0.6s;
-    }
-
-    .button:hover::before {
-      width: 300px;
-      height: 300px;
-    }
-
-    .button:hover {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2));
-      transform: translateY(-3px) scale(1.05);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    }
-
-    .button:active {
-      transform: translateY(-1px) scale(1.02);
-    }
-
-    .button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* Loading state */
-    .loading {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      font-size: 24px;
-      font-weight: 600;
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.7; transform: scale(1.05); }
-    }
-
-    /* Error state */
-    .error {
-      background: linear-gradient(135deg, rgba(255, 59, 48, 0.3), rgba(255, 59, 48, 0.1));
-      backdrop-filter: blur(20px);
-      border: 2px solid rgba(255, 59, 48, 0.5);
-      border-radius: 20px;
-      padding: 25px;
-      margin: 20px;
-      text-align: center;
-      box-shadow: 0 8px 32px rgba(255, 59, 48, 0.3);
-      animation: errorShake 0.5s ease-in-out;
-    }
-
-    @keyframes errorShake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-10px); }
-      75% { transform: translateX(10px); }
-    }
-
-    .error-title {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 12px;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    }
-
-    .error-message {
-      font-size: 16px;
-      opacity: 0.9;
-      margin-bottom: 20px;
-    }
-
-    /* Particle canvas */
-    #particle-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 9999;
-    }
-
-    /* ClickerView styles */
-    .clicker-container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
+    /* Profile Header */
     .player-info {
       text-align: center;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 15px;
+      margin-bottom: 30px;
+      position: relative;
     }
 
     .player-avatar {
-      width: 64px;
-      height: 64px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
       margin-bottom: 10px;
-      border: 3px solid rgba(255, 255, 255, 0.3);
+      animation: float-avatar 4s ease-in-out infinite;
+    }
+
+    @keyframes float-avatar {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
 
     .player-name {
       font-size: 24px;
       font-weight: 700;
-      margin: 0;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
     }
 
+    /* Stats Cards */
     .stats-container {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 15px;
+      margin-bottom: 25px;
     }
 
     .stat-card {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.03);
       backdrop-filter: blur(10px);
-      border-radius: 15px;
-      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 15px;
       text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:active {
+      transform: scale(0.98);
     }
 
     .stat-label {
-      font-size: 14px;
-      opacity: 0.8;
-      margin-bottom: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .stat-value {
       font-size: 28px;
-      font-weight: 700;
-      color: #FFD700;
+      font-weight: 800;
+      background: linear-gradient(to right, #fff, #b3e5fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 10px rgba(179, 229, 252, 0.3));
     }
 
-    .boosts-container {
-      min-height: 40px;
-    }
-
-    .boosts-list {
-      background: rgba(255, 215, 0, 0.1);
-      border: 2px solid rgba(255, 215, 0, 0.3);
-      border-radius: 15px;
-      padding: 15px;
-    }
-
-    .boosts-title {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 10px;
-      opacity: 0.9;
-    }
-
-    .boost-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      margin-bottom: 8px;
-    }
-
-    .boost-item:last-child {
-      margin-bottom: 0;
-    }
-
-    .boost-icon {
-      font-size: 20px;
-    }
-
-    .boost-multiplier {
-      font-size: 18px;
-      font-weight: 700;
-      color: #FFD700;
-      flex: 1;
-    }
-
-    .boost-timer {
-      font-size: 14px;
-      opacity: 0.8;
-    }
-
+    /* Main Click Button - Liquid Sphere */
     .click-area {
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
-      padding: 40px 20px;
+      align-items: center;
+      height: 300px;
+      position: relative;
     }
 
     .click-button {
-      width: 200px;
-      height: 200px;
+      width: 240px;
+      height: 240px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-      border: 5px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      border: none;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.1) 20%, rgba(255, 255, 255, 0.05) 60%, rgba(255, 255, 255, 0.4) 100%);
+      box-shadow: 
+        inset -10px -10px 20px rgba(0, 0, 0, 0.2),
+        inset 10px 10px 20px rgba(255, 255, 255, 0.4),
+        0 20px 50px rgba(0, 0, 0, 0.3),
+        0 0 0 10px rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(5px);
       cursor: pointer;
-      transition: transform 0.1s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 80px;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .click-button:hover {
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-    }
-
-    .click-button:active {
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-    }
-
-    .click-emoji {
-      display: block;
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.1);
-      }
-    }
-
-    .click-hint {
-      margin-top: 20px;
-      font-size: 16px;
-      opacity: 0.7;
-      animation: bounce 2s ease-in-out infinite;
-    }
-
-    @keyframes bounce {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-10px);
-      }
-    }
-
-    .progress-container {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      padding: 15px;
-    }
-
-    .progress-label {
-      font-size: 14px;
-      margin-bottom: 10px;
-      opacity: 0.8;
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 20px;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 10px;
+      position: relative;
+      transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 10;
       overflow: hidden;
     }
 
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #FFD700 0%, #FFA500 100%);
-      border-radius: 10px;
-      transition: width 0.3s ease;
-    }
-
-    .antiboosts-warning {
-      background: rgba(255, 59, 48, 0.2);
-      border: 2px solid rgba(255, 59, 48, 0.5);
-      border-radius: 15px;
-      padding: 15px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .warning-icon {
-      font-size: 24px;
-    }
-
-    .warning-text {
-      flex: 1;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    /* Shop styles */
-    .shop-container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .shop-header {
-      text-align: center;
-    }
-
-    .shop-title {
-      font-size: 28px;
-      margin-bottom: 15px;
-    }
-
-    .shop-currency {
-      font-size: 18px;
-      margin-bottom: 10px;
-    }
-
-    .currency-value {
-      color: #FFD700;
-      font-weight: 700;
-    }
-
-    .shop-timer {
-      font-size: 14px;
-      opacity: 0.8;
-    }
-
-    .shop-items-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 15px;
-    }
-
-    .shop-item {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      padding: 15px;
-      transition: all 0.3s ease;
-    }
-
-    .shop-item:hover {
-      background: rgba(255, 255, 255, 0.15);
-      transform: translateY(-2px);
-    }
-
-    .shop-item-disabled {
-      opacity: 0.6;
-    }
-
-    .item-header {
-      margin-bottom: 10px;
-    }
-
-    .item-name {
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .item-description {
-      font-size: 14px;
-      opacity: 0.9;
-      margin-bottom: 10px;
-    }
-
-    .item-effect {
-      font-size: 13px;
-      color: #FFD700;
-      margin-bottom: 15px;
-    }
-
-    .item-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .item-price {
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .item-buy-button {
-      padding: 8px 16px;
-      background: rgba(76, 175, 80, 0.8);
-      border: none;
-      border-radius: 10px;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .item-buy-button:hover:not(:disabled) {
-      background: rgba(76, 175, 80, 1);
-      transform: scale(1.05);
-    }
-
-    .item-buy-button:disabled {
-      background: rgba(255, 255, 255, 0.2);
-      cursor: not-allowed;
-    }
-
-    /* Profile styles */
-    .profile-container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .profile-header {
-      text-align: center;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 15px;
-    }
-
-    .profile-avatar {
-      width: 100px;
-      height: 100px;
+    .click-button::before {
+      content: '';
+      position: absolute;
+      top: 15%;
+      left: 15%;
+      width: 25%;
+      height: 15%;
       border-radius: 50%;
-      margin-bottom: 15px;
-      border: 4px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .profile-avatar-placeholder {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      margin: 0 auto 15px;
-      background: rgba(255, 255, 255, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 50px;
-    }
-
-    .profile-name {
-      font-size: 28px;
-      margin-bottom: 10px;
-    }
-
-    .profile-rank {
-      font-size: 16px;
-      opacity: 0.8;
-    }
-
-    .section-title {
-      font-size: 20px;
-      margin-bottom: 15px;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 15px;
-    }
-
-    .stat-icon {
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-
-    .stat-content {
-      flex: 1;
-    }
-
-    .profile-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .action-button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.2);
-      border: none;
-      border-radius: 15px;
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .action-button:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: scale(1.02);
-    }
-
-    /* Leaderboard styles */
-    .leaderboard-container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .leaderboard-header {
-      text-align: center;
-    }
-
-    .leaderboard-title {
-      font-size: 28px;
-      margin-bottom: 15px;
-    }
-
-    .leaderboard-stats {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      font-size: 14px;
-    }
-
-    .player-rank-card {
-      background: rgba(255, 215, 0, 0.2);
-      border: 2px solid rgba(255, 215, 0, 0.5);
-      border-radius: 15px;
-      padding: 20px;
-      text-align: center;
-    }
-
-    .rank-value {
-      font-size: 48px;
-      font-weight: 700;
-      color: #FFD700;
-    }
-
-    .leaderboard-list {
-      max-height: 600px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .leaderboard-entry {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      transition: all 0.3s ease;
-    }
-
-    .leaderboard-entry:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    .leaderboard-entry-current {
-      background: rgba(255, 215, 0, 0.2);
-      border: 2px solid rgba(255, 215, 0, 0.5);
-    }
-
-    .entry-rank {
-      font-size: 24px;
-      font-weight: 700;
-      min-width: 50px;
-      text-align: center;
-    }
-
-    .entry-info {
-      flex: 1;
-    }
-
-    .entry-name {
-      font-size: 18px;
-      font-weight: 600;
-    }
-
-    .entry-updated {
-      font-size: 12px;
-      opacity: 0.7;
-    }
-
-    .entry-size {
-      font-size: 20px;
-      font-weight: 700;
-      color: #FFD700;
-    }
-
-    /* Achievements styles */
-    .achievements-container {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .achievements-header {
-      text-align: center;
-    }
-
-    .achievements-title {
-      font-size: 28px;
-      margin-bottom: 15px;
-    }
-
-    .achievements-progress {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .achievements-filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-    }
-
-    .filter-button {
-      padding: 10px 20px;
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      border-radius: 15px;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .filter-button:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .filter-active {
-      background: rgba(255, 215, 0, 0.3);
-      border: 2px solid rgba(255, 215, 0, 0.5);
-    }
-
-    .achievements-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 15px;
-    }
-
-    .achievement-card {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      padding: 15px;
-      display: flex;
-      gap: 15px;
-      transition: all 0.3s ease;
-    }
-
-    .achievement-unlocked {
-      background: rgba(255, 215, 0, 0.1);
-      border: 2px solid rgba(255, 215, 0, 0.3);
-    }
-
-    .achievement-locked {
-      opacity: 0.6;
-    }
-
-    .achievement-icon-container {
-      position: relative;
-    }
-
-    .achievement-icon {
-      font-size: 48px;
-    }
-
-    .achievement-info {
-      flex: 1;
-    }
-
-    .achievement-name {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 5px;
-    }
-
-    .achievement-description {
-      font-size: 13px;
-      opacity: 0.9;
-    }
-
-    /* Notification styles */
-    .achievement-notification {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255, 215, 0, 0.95);
-      color: #000;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      z-index: 10000;
-      display: flex;
-      gap: 15px;
-      align-items: center;
-      max-width: 400px;
-    }
-
-    .achievement-notification .achievement-icon {
-      font-size: 48px;
-    }
-
-    .achievement-title {
-      font-size: 14px;
-      font-weight: 600;
-      opacity: 0.8;
-    }
-
-    .achievement-notification .achievement-name {
-      font-size: 18px;
-      font-weight: 700;
-      margin: 5px 0;
-    }
-
-    .achievement-notification .achievement-description {
-      font-size: 14px;
-    }
-
-    /* ============================================================================
-       ENHANCED GLASSMORPHISM STYLES - Улучшенные стили
-       ============================================================================ */
-
-    /* Enhanced Click Button with Glow */
-    .click-button {
-      width: 220px !important;
-      height: 220px !important;
-      background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF6B6B 100%) !important;
-      border: 6px solid rgba(255, 255, 255, 0.5) !important;
-      box-shadow: 0 15px 50px rgba(255, 215, 0, 0.4),
-                  0 0 60px rgba(255, 165, 0, 0.3),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
-      animation: clickButtonFloat 3s ease-in-out infinite, glow 2s ease-in-out infinite !important;
-      position: relative;
-      overflow: visible;
-    }
-
-    @keyframes clickButtonFloat {
-      0%, 100% { transform: translateY(0) scale(1); }
-      50% { transform: translateY(-15px) scale(1.05); }
+      background: rgba(255, 255, 255, 0.8);
+      filter: blur(2px);
+      transform: rotate(-45deg);
     }
 
     .click-button::after {
       content: '';
       position: absolute;
-      top: -10px;
-      left: -10px;
-      right: -10px;
-      bottom: -10px;
-      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      inset: 0;
       border-radius: 50%;
-      animation: rotate 3s linear infinite;
-      z-index: -1;
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.4), rgba(255, 100, 0, 0.4));
+      opacity: 0.5;
+      mix-blend-mode: overlay;
+      animation: liquid-rotate 10s linear infinite;
     }
 
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    .click-button:hover {
-      box-shadow: 0 20px 60px rgba(255, 215, 0, 0.6),
-                  0 0 80px rgba(255, 165, 0, 0.5),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
-      transform: scale(1.1) !important;
+    @keyframes liquid-rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .click-button:active {
-      transform: scale(0.95) !important;
-      box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4),
-                  0 0 40px rgba(255, 165, 0, 0.3) !important;
+      transform: scale(0.92);
     }
 
-    /* Enhanced Stat Cards */
-    .stat-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1)) !important;
-      backdrop-filter: blur(20px) saturate(180%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.3) !important;
-      border-radius: 20px !important;
-      padding: 20px !important;
+    .click-emoji {
+      font-size: 80px;
+      position: relative;
+      z-index: 2;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+      animation: emoji-float 3s ease-in-out infinite;
+    }
+
+    @keyframes emoji-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      margin-top: 20px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 20px;
+      padding: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .progress-bar {
+      height: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #00c6ff, #0072ff);
+      border-radius: 10px;
+      position: relative;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 10px rgba(0, 114, 255, 0.5);
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      transform: translateX(-100%);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      100% { transform: translateX(100%); }
+    }
+
+    .progress-label {
       text-align: center;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      animation: cardSlideIn 0.6s ease-out backwards;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 5px;
     }
 
-    .stat-card:nth-child(1) { animation-delay: 0.1s; }
-    .stat-card:nth-child(2) { animation-delay: 0.2s; }
-    .stat-card:nth-child(3) { animation-delay: 0.3s; }
-    .stat-card:nth-child(4) { animation-delay: 0.4s; }
-
-    @keyframes cardSlideIn {
-      from {
-        opacity: 0;
-        transform: translateY(30px) scale(0.9);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
+    /* Boosts List */
+    .boosts-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 15px 0;
     }
 
-    .stat-card:hover {
-      transform: translateY(-8px) scale(1.05) !important;
-      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+    .boost-item {
+      background: rgba(255, 215, 0, 0.15);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #ffd700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    .stat-value {
-      font-size: 32px !important;
-      font-weight: 800 !important;
-      background: linear-gradient(135deg, #FFD700, #FFA500);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: valueGlow 2s ease-in-out infinite;
-      text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
-    @keyframes valueGlow {
-      0%, 100% { filter: brightness(1); }
-      50% { filter: brightness(1.3); }
+    /* Shop Grid */
+    .shop-items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 15px;
     }
 
-    /* Enhanced Shop Items */
     .shop-item {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05)) !important;
-      backdrop-filter: blur(20px) saturate(180%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.3) !important;
-      border-radius: 20px !important;
-      padding: 20px !important;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
     }
 
-    .shop-item::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s;
-    }
-
-    .shop-item:hover::before {
-      left: 100%;
-    }
-
     .shop-item:hover {
-      transform: translateY(-10px) scale(1.03) !important;
-      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
-      border-color: rgba(255, 215, 0, 0.5) !important;
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+
+    .item-name {
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 1.3;
+    }
+
+    .item-price {
+      font-weight: 700;
+      color: #ffd700;
+      font-size: 14px;
     }
 
     .item-buy-button {
-      background: linear-gradient(135deg, rgba(76, 175, 80, 0.9), rgba(56, 142, 60, 0.9)) !important;
-      backdrop-filter: blur(10px) !important;
-      border: 1px solid rgba(255, 255, 255, 0.3) !important;
-      border-radius: 15px !important;
-      padding: 10px 20px !important;
-      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      width: 100%;
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      background: var(--primary-gradient);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
     }
 
-    .item-buy-button:hover:not(:disabled) {
-      background: linear-gradient(135deg, rgba(76, 175, 80, 1), rgba(56, 142, 60, 1)) !important;
-      transform: translateY(-2px) scale(1.1) !important;
-      box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+    .item-buy-button:disabled {
+      opacity: 0.5;
+      background: #444;
+      cursor: not-allowed;
     }
 
-    /* Enhanced Boosts List */
-    .boosts-list {
-      background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.05)) !important;
-      backdrop-filter: blur(20px) !important;
-      border: 2px solid rgba(255, 215, 0, 0.5) !important;
-      border-radius: 20px !important;
-      padding: 20px !important;
-      box-shadow: 0 8px 32px rgba(255, 215, 0, 0.2),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-      animation: boostPulse 2s ease-in-out infinite;
-    }
-
-    @keyframes boostPulse {
-      0%, 100% { box-shadow: 0 8px 32px rgba(255, 215, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3); }
-      50% { box-shadow: 0 8px 32px rgba(255, 215, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4); }
-    }
-
-    .boost-item {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05)) !important;
-      backdrop-filter: blur(10px) !important;
-      border: 1px solid rgba(255, 255, 255, 0.3) !important;
-      border-radius: 15px !important;
-      padding: 12px !important;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-      animation: boostItemSlide 0.5s ease-out;
-    }
-
-    @keyframes boostItemSlide {
-      from {
-        opacity: 0;
-        transform: translateX(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    /* Enhanced Progress Bar */
-    .progress-bar {
-      background: rgba(0, 0, 0, 0.4) !important;
-      border: 1px solid rgba(255, 255, 255, 0.2) !important;
-      border-radius: 15px !important;
-      overflow: hidden;
-      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3) !important;
-    }
-
-    .progress-fill {
-      background: linear-gradient(90deg, #FFD700 0%, #FFA500 50%, #FF6B6B 100%) !important;
-      border-radius: 15px !important;
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.6),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
-      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      animation: progressGlow 2s ease-in-out infinite;
-    }
-
-    @keyframes progressGlow {
-      0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.5); }
-      50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.7); }
-    }
-
-    /* Enhanced Leaderboard Entry */
-    .leaderboard-entry {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05)) !important;
-      backdrop-filter: blur(20px) !important;
-      border: 1px solid rgba(255, 255, 255, 0.3) !important;
-      border-radius: 18px !important;
-      padding: 18px !important;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
-    }
-
-    .leaderboard-entry:hover {
-      transform: translateX(10px) scale(1.02) !important;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-      border-color: rgba(255, 215, 0, 0.5) !important;
-    }
-
-    .leaderboard-entry-current {
-      background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.1)) !important;
-      border: 2px solid rgba(255, 215, 0, 0.7) !important;
-      box-shadow: 0 8px 32px rgba(255, 215, 0, 0.3),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
-      animation: currentPlayerGlow 2s ease-in-out infinite;
-    }
-
-    @keyframes currentPlayerGlow {
-      0%, 100% { box-shadow: 0 8px 32px rgba(255, 215, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4); }
-      50% { box-shadow: 0 8px 32px rgba(255, 215, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.6); }
-    }
-
-    /* Enhanced Achievement Card */
-    .achievement-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05)) !important;
-      backdrop-filter: blur(20px) saturate(180%) !important;
-      border: 1px solid rgba(255, 255, 255, 0.3) !important;
-      border-radius: 20px !important;
-      padding: 18px !important;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
-    }
-
-    .achievement-card:hover {
-      transform: translateY(-8px) rotate(2deg) scale(1.05) !important;
-      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
-    }
-
-    .achievement-unlocked {
-      background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 215, 0, 0.1)) !important;
-      border: 2px solid rgba(255, 215, 0, 0.5) !important;
-      box-shadow: 0 8px 32px rgba(255, 215, 0, 0.3),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
-      animation: achievementShine 3s ease-in-out infinite;
-    }
-
-    @keyframes achievementShine {
-      0%, 100% { box-shadow: 0 8px 32px rgba(255, 215, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4); }
-      50% { box-shadow: 0 8px 32px rgba(255, 215, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.6); }
+    /* Notifications */
+    .achievement-notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: rgba(20, 20, 20, 0.9);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      padding: 15px 25px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      z-index: 2000;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      min-width: 300px;
     }
 
     .achievement-icon {
-      font-size: 56px !important;
-      animation: iconFloat 3s ease-in-out infinite;
-      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+      font-size: 32px;
     }
 
-    @keyframes iconFloat {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-10px) rotate(5deg); }
+    /* Loading */
+    .loading {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 2px;
+      animation: pulse 1.5s infinite;
     }
 
-    /* Enhanced Filter Buttons */
-    .filter-button {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05)) !important;
-      backdrop-filter: blur(15px) !important;
-      border: 1px solid rgba(255, 255, 255, 0.3) !important;
-      border-radius: 18px !important;
-      padding: 12px 24px !important;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
     }
-
-    .filter-button:hover {
-      transform: translateY(-3px) scale(1.05) !important;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-    }
-
-    .filter-active {
-      background: linear-gradient(135deg, rgba(255, 215, 0, 0.4), rgba(255, 215, 0, 0.2)) !important;
-      border: 2px solid rgba(255, 215, 0, 0.7) !important;
-      box-shadow: 0 6px 25px rgba(255, 215, 0, 0.4),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
-      transform: scale(1.05) !important;
-    }
-
-    /* Enhanced Action Button */
-    .action-button {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1)) !important;
-      backdrop-filter: blur(15px) !important;
-      border: 1px solid rgba(255, 255, 255, 0.3) !important;
-      border-radius: 18px !important;
-      padding: 18px !important;
-      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    }
-
-    .action-button:hover {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2)) !important;
-      transform: translateY(-5px) scale(1.05) !important;
-      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
-    }
-
-    /* Responsive Enhancements */
-    @media (max-width: 768px) {
-      .click-button {
-        width: 180px !important;
-        height: 180px !important;
-        font-size: 70px !important;
-      }
-
-      .stat-value {
-        font-size: 24px !important;
-      }
-
-      .achievement-icon {
-        font-size: 48px !important;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .click-button {
-        width: 160px !important;
-        height: 160px !important;
-        font-size: 60px !important;
-      }
-
-      .stat-card {
-        padding: 15px !important;
-      }
-
-      .stat-value {
-        font-size: 20px !important;
-      }
-    }
-
-    /* Scrollbar Styling */
+    
+    /* Scrollbar */
     ::-webkit-scrollbar {
-      width: 10px;
+      width: 6px;
     }
-
     ::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
+      background: transparent;
     }
-
     ::-webkit-scrollbar-thumb {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
-      border-radius: 10px;
-      border: 2px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
     }
 
-    ::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2));
+    /* Ripple Effect */
+    .ripple {
+      position: fixed;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(0);
+      animation: ripple-anim 0.8s ease-out;
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: overlay;
+    }
+
+    @keyframes ripple-anim {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="liquid-background">
+    <div class="blob"></div>
+    <div class="blob"></div>
+    <div class="blob"></div>
+  </div>
   <canvas id="particle-canvas"></canvas>
   <div id="app">
     <div class="loading">Загрузка...</div>
@@ -3624,6 +2771,24 @@
         `;
       }
     }
+
+    // Ripple Effect
+    document.addEventListener('click', function(e) {
+      const ripple = document.createElement('div');
+      ripple.className = 'ripple';
+      document.body.appendChild(ripple);
+      
+      const rect = { width: 100, height: 100 }; // Default size
+      const size = Math.max(rect.width, rect.height);
+      
+      ripple.style.width = ripple.style.height = `${size}px`;
+      ripple.style.left = `${e.clientX - size/2}px`;
+      ripple.style.top = `${e.clientY - size/2}px`;
+      
+      ripple.addEventListener('animationend', () => {
+        ripple.remove();
+      });
+    });
 
     // Запуск приложения
     document.addEventListener('DOMContentLoaded', () => {
