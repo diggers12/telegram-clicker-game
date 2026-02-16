@@ -1598,7 +1598,8 @@
                         size: player.size || 0,
                         coins: player.coins || 0,
                         time: player.time || 0,
-                        achievements: player.achievements || []
+                        achievements: player.achievements || [],
+                        photoUrl: player.photoUrl || null // Добавляем фото
                     });
                 }
                 
@@ -1628,12 +1629,21 @@
             }
             
             try {
+                // Получаем фото профиля из Telegram
+                const tg = window.Telegram?.WebApp;
+                let photoUrl = null;
+                
+                if (tg && tg.initDataUnsafe?.user?.photo_url) {
+                    photoUrl = tg.initDataUnsafe.user.photo_url;
+                }
+                
                 const playerData = {
                     name: state.userName,
                     size: state.size,
                     coins: state.coins,
                     time: state.totalPlayTime,
                     achievements: state.unlockedAchievements,
+                    photoUrl: photoUrl, // Добавляем URL фото
                     lastUpdate: Date.now()
                 };
                 
@@ -2585,9 +2595,14 @@
                 else if (idx === 1) rankClass = 'silver';
                 else if (idx === 2) rankClass = 'bronze';
                 
+                // Аватарка: если есть фото - показываем, иначе первую букву имени
+                const avatarContent = player.photoUrl 
+                    ? `<img src="${player.photoUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.textContent='${player.name.charAt(0)}'">` 
+                    : player.name.charAt(0);
+                
                 div.innerHTML = `
                     <div class="lb-rank ${rankClass}">${idx + 1}</div>
-                    <div class="lb-avatar">${player.name.charAt(0)}</div>
+                    <div class="lb-avatar">${avatarContent}</div>
                     <div class="lb-info">
                         <div class="lb-name ${player.isCurrentUser ? 'you' : ''}">${player.name}${player.isCurrentUser ? ' (Ты)' : ''}</div>
                     </div>
