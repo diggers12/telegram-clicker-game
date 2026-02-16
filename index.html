@@ -1114,6 +1114,9 @@
         const EXCHANGE_RATE = 3;
         const SIZE_PER_LEVEL = 100;
         const DAILY_REWARD_COOLDOWN = 24 * 60 * 60 * 1000; // 24 часа
+        
+        // API сервер (твой бот на хостинге)
+        const API_URL = 'http://f1.rustix.me:33295';
 
         const DAILY_REWARDS = [
             // Обычные (70% шанс)
@@ -1531,44 +1534,43 @@
         };
 
         // Здесь будут данные других игроков из бэкенда
-        // Пока пустой массив - заполнится когда подключишь сервер
-        const LEADERBOARD_DATA = [];
+        let LEADERBOARD_DATA = [];
         
-        // Функция для получения топа игроков (готова для API)
+        // Функция для получения топа игроков
         async function fetchLeaderboard() {
-            // TODO: Когда будет бэкенд, раскомментируй:
-            // try {
-            //     const response = await fetch('https://your-api.com/leaderboard');
-            //     const data = await response.json();
-            //     return data.players; // Массив игроков
-            // } catch (error) {
-            //     console.error('Ошибка загрузки топа:', error);
-            //     return [];
-            // }
+            try {
+                const response = await fetch(`${API_URL}/api/leaderboard`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    LEADERBOARD_DATA = data.players || [];
+                    return LEADERBOARD_DATA;
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки топа:', error);
+            }
             
-            // Пока возвращаем пустой массив
-            return LEADERBOARD_DATA;
+            return [];
         }
         
-        // Функция для отправки своей статистики на сервер (готова для API)
+        // Функция для отправки своей статистики на сервер
         async function syncPlayerData() {
-            // TODO: Когда будет бэкенд, раскомментируй:
-            // try {
-            //     await fetch('https://your-api.com/player/update', {
-            //         method: 'POST',
-            //         headers: { 'Content-Type': 'application/json' },
-            //         body: JSON.stringify({
-            //             userId: state.userId,
-            //             name: state.userName,
-            //             size: state.size,
-            //             coins: state.coins,
-            //             time: state.totalPlayTime,
-            //             achievements: state.unlockedAchievements
-            //         })
-            //     });
-            // } catch (error) {
-            //     console.error('Ошибка синхронизации:', error);
-            // }
+            try {
+                await fetch(`${API_URL}/api/sync`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: state.userId,
+                        name: state.userName,
+                        size: state.size,
+                        coins: state.coins,
+                        time: state.totalPlayTime,
+                        achievements: state.unlockedAchievements
+                    })
+                });
+            } catch (error) {
+                console.error('Ошибка синхронизации:', error);
+            }
         }
 
         // ============================================
@@ -1931,7 +1933,7 @@
                 localStorage.setItem('shopLastUpdate', Date.now().toString());
             }
             
-            // Синхронизация с сервером (когда будет бэкенд)
+            // Синхронизация с сервером
             syncPlayerData();
         }
 
@@ -2406,7 +2408,7 @@
         }
 
         async function renderLeaderboard() {
-            // Получаем данные других игроков (пока пусто, но готово для API)
+            // Получаем данные других игроков
             const otherPlayers = await fetchLeaderboard();
             
             const allPlayers = [...otherPlayers];
