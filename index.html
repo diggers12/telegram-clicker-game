@@ -1007,21 +1007,6 @@
                     <div class="inventory-grid" id="inventoryGrid"></div>
                     <div class="empty-text" id="noInventory">Инвентарь пуст</div>
                 </div>
-                <div class="inventory-section" style="margin-top: 20px;">
-                    <button onclick="resetGameCompletely()" style="width: 100%; padding: 12px; border-radius: 12px; border: 2px solid var(--danger); background: rgba(248, 113, 113, 0.1); color: var(--danger); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; margin-bottom: 10px;">
-                        🗑️ СБРОСИТЬ МОИ ДАННЫЕ
-                    </button>
-                    <div style="text-align: center; font-size: 10px; color: var(--text-muted); margin-bottom: 16px;">
-                        Удалит ваши данные из игры и Firebase
-                    </div>
-                    
-                    <button onclick="deleteAllPlayersFromFirebase()" style="width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #ff0000; background: rgba(255, 0, 0, 0.2); color: #ff0000; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">
-                        💀 УДАЛИТЬ ВСЕХ ИГРОКОВ
-                    </button>
-                    <div style="text-align: center; font-size: 10px; color: var(--text-muted); margin-top: 8px;">
-                        ⚠️ Удалит ВСЕХ пользователей из Firebase
-                    </div>
-                </div>
             </div>
         </section>
 
@@ -1774,12 +1759,42 @@
             }
             
             try {
-                const { ref, remove } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js');
-                const playersRef = ref(firebaseDB, 'players');
-                await remove(playersRef);
+                showToast('⏳ Загрузка списка игроков...', 'warning');
                 
-                showToast('✅ Все игроки удалены из Firebase!', 'success');
-                console.log('✅ Все игроки удалены из Firebase');
+                // Сначала получаем список всех игроков
+                const { ref, get, remove } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js');
+                const playersRef = ref(firebaseDB, 'players');
+                const snapshot = await get(playersRef);
+                
+                if (!snapshot.exists()) {
+                    showToast('✅ База данных уже пуста', 'success');
+                    return;
+                }
+                
+                const players = snapshot.val();
+                const playerIds = Object.keys(players);
+                
+                showToast(`⏳ Удаление ${playerIds.length} игроков...`, 'warning');
+                
+                // Удаляем каждого игрока по отдельности
+                let deleted = 0;
+                for (const userId of playerIds) {
+                    try {
+                        const playerRef = ref(firebaseDB, `players/${userId}`);
+                        await remove(playerRef);
+                        deleted++;
+                        
+                        // Показываем прогресс каждые 10 игроков
+                        if (deleted % 10 === 0) {
+                            console.log(`Удалено ${deleted}/${playerIds.length} игроков`);
+                        }
+                    } catch (error) {
+                        console.error(`Ошибка удаления игрока ${userId}:`, error);
+                    }
+                }
+                
+                showToast(`✅ Удалено ${deleted} игроков из Firebase!`, 'success');
+                console.log(`✅ Удалено ${deleted} из ${playerIds.length} игроков`);
                 
                 // Перезагружаем страницу через 2 секунды
                 setTimeout(() => {
@@ -1822,6 +1837,10 @@
                 showToast('❌ Ошибка при сбросе данных', 'error');
             }
         }
+
+        // Экспортируем функции в глобальную область для доступа из HTML
+        window.resetGameCompletely = resetGameCompletely;
+        window.deleteAllPlayersFromFirebase = deleteAllPlayersFromFirebase;
 
         // ============================================
         // AUDIO ENGINE
