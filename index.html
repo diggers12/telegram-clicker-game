@@ -1174,12 +1174,12 @@
         // Anti-autoclicker protection
         let antiCheat = {
             clicks: [],
-            maxClicks: 20,
+            maxClicks: 30,  // Увеличено с 20 до 30
             timeWindow: 1000,
-            suspiciousThreshold: 15,
-            banThreshold: 25,
-            minInterval: 30,
-            maxCPS: 15,
+            suspiciousThreshold: 25,  // Увеличено с 15 до 25
+            banThreshold: 35,  // Увеличено с 25 до 35
+            minInterval: 20,  // Уменьшено с 30 до 20
+            maxCPS: 20,  // Увеличено с 15 до 20 кликов в секунду
             warnings: 0,
             isBanned: false,
             lastWarningTime: 0,
@@ -1197,7 +1197,7 @@
                 const now = Date.now();
                 this.clicks = this.clicks.filter(t => now - t < this.timeWindow);
                 
-                if (this.clicks.length < 5) return true;
+                if (this.clicks.length < 8) return true;  // Увеличено с 5 до 8
                 
                 // Check CPS (clicks per second)
                 const cps = this.clicks.length / (this.timeWindow / 1000);
@@ -1206,26 +1206,26 @@
                     return false;
                 }
                 
-                // Check for identical intervals (bot pattern)
+                // Check for identical intervals (bot pattern) - более строгая проверка
                 const intervals = [];
                 for (let i = 1; i < this.clicks.length; i++) {
                     intervals.push(this.clicks[i] - this.clicks[i-1]);
                 }
                 
-                // If too many identical intervals - likely a bot
+                // Если ОЧЕНЬ много одинаковых интервалов (точность 3ms) - это бот
                 const identicalCount = intervals.filter((v, i, arr) => 
-                    arr.filter(x => Math.abs(x - v) < 5).length > 3
+                    arr.filter(x => Math.abs(x - v) < 3).length > 5  // Увеличено с 3 до 5
                 ).length;
                 
-                if (identicalCount > 5) {
+                if (identicalCount > 8) {  // Увеличено с 5 до 8
                     this.handleSuspicious('Обнаружен паттерн бота');
                     return false;
                 }
                 
-                // Check for too many clicks in short time
+                // Check for too many clicks in short time - более мягкая проверка
                 if (this.clicks.length >= this.suspiciousThreshold) {
-                    const recentClicks = this.clicks.filter(t => now - t < 500);
-                    if (recentClicks.length >= 10) {
+                    const recentClicks = this.clicks.filter(t => now - t < 300);  // Уменьшено с 500 до 300ms
+                    if (recentClicks.length >= 15) {  // Увеличено с 10 до 15
                         this.handleSuspicious('Подозрительная активность');
                         return false;
                     }
@@ -1238,31 +1238,31 @@
                 const now = Date.now();
                 
                 // Don't spam warnings
-                if (now - this.lastWarningTime < 3000) return;
+                if (now - this.lastWarningTime < 5000) return;  // Увеличено с 3000 до 5000ms
                 
                 this.warnings++;
                 this.lastWarningTime = now;
                 
-                if (this.warnings >= 3) {
+                if (this.warnings >= 5) {  // Увеличено с 3 до 5 предупреждений
                     this.ban();
                 } else {
-                    showToast(`⚠️ Предупреждение ${this.warnings}/3: ${reason}`, 'error');
+                    showToast(`⚠️ Предупреждение ${this.warnings}/5: ${reason}`, 'error');
                     playSound('error');
                 }
             },
             
             ban() {
                 this.isBanned = true;
-                showToast('🚫 Обнаружен автокликер! Игра заблокирована на 5 минут', 'error');
+                showToast('🚫 Обнаружен автокликер! Игра заблокирована на 3 минуты', 'error');
                 playSound('error');
                 
-                // Unban after 5 minutes
+                // Unban after 3 minutes (уменьшено с 5 до 3)
                 setTimeout(() => {
                     this.isBanned = false;
                     this.warnings = 0;
                     this.clicks = [];
                     showToast('✅ Блокировка снята. Играйте честно!', 'success');
-                }, 300000); // 5 minutes
+                }, 180000); // 3 minutes
             },
             
             reset() {
