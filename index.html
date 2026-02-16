@@ -7,10 +7,6 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-    
     <script type="importmap">
     {
         "imports": {
@@ -1083,6 +1079,8 @@
 
     <script type="module">
         import * as THREE from 'three';
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, get, child } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
         // ============================================
         // ECONOMY SCALING SYSTEM
@@ -1139,7 +1137,7 @@
             { id: 'small_coins', name: 'Монеты', desc: '+5% от текущих', icon: '💰', rarity: 'common', weight: 15, effect: { type: 'instantCoinsPercent', value: 0.05 }, duration: 0, color: '#fcd34d' },
             
             // Редкие (20% шанс)
-            { id: 'medium_mult', name: 'Усилитель x5', desc: 'x5 к клику на 10 минут', icon: '�', rarity: 'rare', weight: 10, effect: { type: 'multiply', value: 5 }, duration: 600000, color: '#b366ff' },
+            { id: 'medium_mult', name: 'Усилитель x5', desc: 'x5 к клику на 10 минут', icon: '💸', rarity: 'rare', weight: 10, effect: { type: 'multiply', value: 5 }, duration: 600000, color: '#b366ff' },
             { id: 'medium_auto', name: 'Авто-клик', desc: '2 клика/сек на 10 минут', icon: '🤖', rarity: 'rare', weight: 8, effect: { type: 'autoclick', value: 2 }, duration: 600000, color: '#8b5cf6' },
             { id: 'medium_size', name: 'Размер +10%', desc: 'От текущего размера', icon: '📐', rarity: 'rare', weight: 2, effect: { type: 'instantSizePercent', value: 0.10 }, duration: 0, color: '#3b82f6' },
             
@@ -1550,14 +1548,13 @@
         // Здесь будут данные других игроков из Firebase
         let LEADERBOARD_DATA = [];
         let firebaseDB = null;
+        let firebaseApp = null;
         
         // Инициализация Firebase
         function initFirebase() {
             try {
-                if (!firebase.apps.length) {
-                    firebase.initializeApp(FIREBASE_CONFIG);
-                }
-                firebaseDB = firebase.database();
+                firebaseApp = initializeApp(FIREBASE_CONFIG);
+                firebaseDB = getDatabase(firebaseApp);
                 console.log('✅ Firebase подключен');
             } catch (error) {
                 console.error('❌ Ошибка подключения Firebase:', error);
@@ -1572,30 +1569,42 @@
             }
             
             try {
-                const snapshot = await firebaseDB.ref('players').orderByChild('size').limitToLast(100).once('value');
+                console.log('🔄 Загрузка топа игроков...');
+                const dbRef = ref(firebaseDB);
+                const snapshot = await get(child(dbRef, 'players'));
+                
+                if (!snapshot.exists()) {
+                    console.log('📭 Нет данных игроков');
+                    return [];
+                }
+                
+                const playersData = snapshot.val();
                 const players = [];
                 
-                snapshot.forEach((childSnapshot) => {
-                    const player = childSnapshot.val();
+                for (const userId in playersData) {
+                    const player = playersData[userId];
                     players.push({
-                        userId: childSnapshot.key,
+                        userId: userId,
                         name: player.name || 'Игрок',
                         size: player.size || 0,
                         coins: player.coins || 0,
                         time: player.time || 0,
                         achievements: player.achievements || []
                     });
-                });
+                }
                 
                 // Сортируем по размеру (от большего к меньшему)
                 players.sort((a, b) => b.size - a.size);
                 
                 LEADERBOARD_DATA = players;
-                console.log(`Загружено игроков: ${players.length}`);
+                console.log(`✅ Загружено игроков: ${players.length}`);
+                if (players.length > 0) {
+                    console.log('Топ-3:', players.slice(0, 3).map(p => `${p.name}: ${p.size}`));
+                }
                 return players;
                 
             } catch (error) {
-                console.error('Ошибка загрузки топа:', error);
+                console.error('❌ Ошибка загрузки топа:', error);
                 return [];
             }
         }
@@ -1617,7 +1626,8 @@
                     lastUpdate: Date.now()
                 };
                 
-                await firebaseDB.ref(`players/${state.userId}`).set(playerData);
+                const playerRef = ref(firebaseDB, `players/${state.userId}`);
+                await set(playerRef, playerData);
                 console.log('✅ Данные синхронизированы с Firebase');
                 
             } catch (error) {
