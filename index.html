@@ -2470,23 +2470,54 @@
         }
 
         async function renderLeaderboard() {
-            // Получаем данные других игроков
+            console.log('🔄 Рендер топа игроков...');
+            
+            // Получаем данные других игроков из Firebase
             const otherPlayers = await fetchLeaderboard();
             
-            const allPlayers = [...otherPlayers];
+            console.log(`📊 Получено игроков из Firebase: ${otherPlayers.length}`);
             
-            // Добавляем текущего игрока
-            allPlayers.push({
-                name: state.userName,
-                size: state.size,
-                coins: state.coins,
-                time: state.totalPlayTime,
-                achievements: state.unlockedAchievements,
-                isCurrentUser: true
+            // Создаём список всех игроков
+            const allPlayers = [];
+            
+            // Добавляем игроков из Firebase
+            otherPlayers.forEach(player => {
+                // Если это текущий игрок - обновляем его данными из state
+                if (player.userId === state.userId) {
+                    allPlayers.push({
+                        userId: state.userId,
+                        name: state.userName,
+                        size: state.size,
+                        coins: state.coins,
+                        time: state.totalPlayTime,
+                        achievements: state.unlockedAchievements,
+                        isCurrentUser: true
+                    });
+                } else {
+                    allPlayers.push({
+                        ...player,
+                        isCurrentUser: false
+                    });
+                }
             });
+            
+            // Если текущего игрока нет в списке - добавляем
+            if (!allPlayers.some(p => p.userId === state.userId)) {
+                allPlayers.push({
+                    userId: state.userId,
+                    name: state.userName,
+                    size: state.size,
+                    coins: state.coins,
+                    time: state.totalPlayTime,
+                    achievements: state.unlockedAchievements,
+                    isCurrentUser: true
+                });
+            }
             
             // Сортируем по размеру
             allPlayers.sort((a, b) => b.size - a.size);
+            
+            console.log(`✅ Всего игроков в топе: ${allPlayers.length}`);
             
             // Находим позицию текущего игрока
             const userRank = allPlayers.findIndex(p => p.isCurrentUser) + 1;
@@ -2502,8 +2533,8 @@
             
             els.leaderboardList.innerHTML = '';
             
-            // Показываем топ-10 или всех если меньше
-            const topPlayers = allPlayers.slice(0, Math.max(10, allPlayers.length));
+            // Показываем топ-100
+            const topPlayers = allPlayers.slice(0, 100);
             
             topPlayers.forEach((player, idx) => {
                 const div = document.createElement('div');
@@ -2520,7 +2551,7 @@
                     <div class="lb-info">
                         <div class="lb-name ${player.isCurrentUser ? 'you' : ''}">${player.name}${player.isCurrentUser ? ' (Ты)' : ''}</div>
                     </div>
-                    <div class="lb-value">${player.size.toLocaleString()}<span>${player.achievements.length} ачивок</span></div>
+                    <div class="lb-value">${player.size.toLocaleString()}<span>${(player.achievements || []).length} ачивок</span></div>
                 `;
                 
                 div.addEventListener('click', () => {
