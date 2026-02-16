@@ -2472,6 +2472,9 @@
         async function renderLeaderboard() {
             console.log('🔄 Рендер топа игроков...');
             
+            // Показываем индикатор загрузки
+            els.leaderboardList.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);"><div style="font-size: 32px; margin-bottom: 10px;">⏳</div>Загрузка топа игроков...</div>';
+            
             // Получаем данные других игроков из Firebase
             const otherPlayers = await fetchLeaderboard();
             
@@ -3020,7 +3023,7 @@
             });
         }
 
-        function switchTab(tabId) {
+        async function switchTab(tabId) {
             const targetTab = document.getElementById(tabId);
             const targetNav = document.querySelector(`[data-tab="${tabId}"]`);
             
@@ -3037,7 +3040,7 @@
             if (tabId === 'casesTab') renderCases();
             if (tabId === 'achTab') updateAchievementsUI();
             if (tabId === 'inventoryTab') renderInventory();
-            if (tabId === 'topTab') renderLeaderboard();
+            if (tabId === 'topTab') await renderLeaderboard(); // ЖДЁМ загрузки!
             if (tabId === 'dailyTab') renderDailyReward();
         }
 
