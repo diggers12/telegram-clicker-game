@@ -1171,15 +1171,11 @@
             dailyRewardStreak: 0
         };
 
-        // Anti-autoclicker protection
+        // Anti-autoclicker protection - умная система на основе статистического анализа
         let antiCheat = {
             clicks: [],
-            maxClicks: 30,  // Увеличено с 20 до 30
-            timeWindow: 1000,
-            suspiciousThreshold: 25,  // Увеличено с 15 до 25
-            banThreshold: 35,  // Увеличено с 25 до 35
-            minInterval: 20,  // Уменьшено с 30 до 20
-            maxCPS: 20,  // Увеличено с 15 до 20 кликов в секунду
+            maxClicks: 50,  // Храним больше данных для анализа
+            timeWindow: 2000,  // 2 секунды
             warnings: 0,
             isBanned: false,
             lastWarningTime: 0,
@@ -1191,44 +1187,66 @@
                 }
             },
             
+            // Вычисление стандартного отклонения интервалов
+            calculateStandardDeviation(intervals) {
+                if (intervals.length < 2) return Infinity;
+                
+                const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+                const variance = intervals.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / intervals.length;
+                return Math.sqrt(variance);
+            },
+            
             checkPattern() {
                 if (this.isBanned) return false;
                 
                 const now = Date.now();
                 this.clicks = this.clicks.filter(t => now - t < this.timeWindow);
                 
-                if (this.clicks.length < 8) return true;  // Увеличено с 5 до 8
+                // Нужно минимум 15 кликов для анализа
+                if (this.clicks.length < 15) return true;
                 
-                // Check CPS (clicks per second)
-                const cps = this.clicks.length / (this.timeWindow / 1000);
-                if (cps > this.maxCPS) {
-                    this.handleSuspicious('Слишком быстрые клики');
-                    return false;
-                }
-                
-                // Check for identical intervals (bot pattern) - более строгая проверка
+                // Вычисляем интервалы между кликами
                 const intervals = [];
                 for (let i = 1; i < this.clicks.length; i++) {
                     intervals.push(this.clicks[i] - this.clicks[i-1]);
                 }
                 
-                // Если ОЧЕНЬ много одинаковых интервалов (точность 3ms) - это бот
-                const identicalCount = intervals.filter((v, i, arr) => 
-                    arr.filter(x => Math.abs(x - v) < 3).length > 5  // Увеличено с 3 до 5
-                ).length;
+                // Вычисляем стандартное отклонение
+                const stdDev = this.calculateStandardDeviation(intervals);
+                const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
                 
-                if (identicalCount > 8) {  // Увеличено с 5 до 8
-                    this.handleSuspicious('Обнаружен паттерн бота');
+                // Коэффициент вариации (CV) = стандартное отклонение / среднее
+                const cv = stdDev / mean;
+                
+                // Человек имеет CV > 0.15 (вариативность 15%+)
+                // Автокликер имеет CV < 0.10 (слишком стабильные интервалы)
+                if (cv < 0.10 && this.clicks.length >= 20) {
+                    this.handleSuspicious(`Подозрительная стабильность (CV: ${cv.toFixed(3)})`);
                     return false;
                 }
                 
-                // Check for too many clicks in short time - более мягкая проверка
-                if (this.clicks.length >= this.suspiciousThreshold) {
-                    const recentClicks = this.clicks.filter(t => now - t < 300);  // Уменьшено с 500 до 300ms
-                    if (recentClicks.length >= 15) {  // Увеличено с 10 до 15
-                        this.handleSuspicious('Подозрительная активность');
-                        return false;
+                // Проверка на нечеловеческую скорость (более 25 CPS)
+                const cps = this.clicks.length / (this.timeWindow / 1000);
+                if (cps > 25) {
+                    this.handleSuspicious(`Слишком высокий CPS: ${cps.toFixed(1)}`);
+                    return false;
+                }
+                
+                // Проверка на идентичные интервалы (точность 2ms)
+                let identicalPairs = 0;
+                for (let i = 0; i < intervals.length - 1; i++) {
+                    for (let j = i + 1; j < intervals.length; j++) {
+                        if (Math.abs(intervals[i] - intervals[j]) < 2) {
+                            identicalPairs++;
+                        }
                     }
+                }
+                
+                // Если более 40% интервалов идентичны - это бот
+                const identicalRatio = identicalPairs / (intervals.length * (intervals.length - 1) / 2);
+                if (identicalRatio > 0.4 && this.clicks.length >= 20) {
+                    this.handleSuspicious(`Слишком много идентичных интервалов: ${(identicalRatio * 100).toFixed(1)}%`);
+                    return false;
                 }
                 
                 return true;
@@ -1237,32 +1255,33 @@
             handleSuspicious(reason) {
                 const now = Date.now();
                 
-                // Don't spam warnings
-                if (now - this.lastWarningTime < 5000) return;  // Увеличено с 3000 до 5000ms
+                // Не спамим предупреждениями
+                if (now - this.lastWarningTime < 8000) return;
                 
                 this.warnings++;
                 this.lastWarningTime = now;
                 
-                if (this.warnings >= 5) {  // Увеличено с 3 до 5 предупреждений
+                console.log(`[AntiCheat] ${reason}`);
+                
+                if (this.warnings >= 3) {
                     this.ban();
                 } else {
-                    showToast(`⚠️ Предупреждение ${this.warnings}/5: ${reason}`, 'error');
-                    playSound('error');
+                    showToast(`⚠️ Предупреждение ${this.warnings}/3`, 'error');
                 }
             },
             
             ban() {
                 this.isBanned = true;
-                showToast('🚫 Обнаружен автокликер! Игра заблокирована на 3 минуты', 'error');
+                showToast('🚫 Обнаружен автокликер! Блокировка на 2 минуты', 'error');
                 playSound('error');
                 
-                // Unban after 3 minutes (уменьшено с 5 до 3)
+                // Разбан через 2 минуты
                 setTimeout(() => {
                     this.isBanned = false;
                     this.warnings = 0;
                     this.clicks = [];
-                    showToast('✅ Блокировка снята. Играйте честно!', 'success');
-                }, 180000); // 3 minutes
+                    showToast('✅ Блокировка снята', 'success');
+                }, 120000); // 2 minutes
             },
             
             reset() {
