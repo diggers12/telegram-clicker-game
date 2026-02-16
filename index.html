@@ -1007,6 +1007,21 @@
                     <div class="inventory-grid" id="inventoryGrid"></div>
                     <div class="empty-text" id="noInventory">Инвентарь пуст</div>
                 </div>
+                <div class="inventory-section" style="margin-top: 20px;">
+                    <button onclick="resetGameCompletely()" style="width: 100%; padding: 12px; border-radius: 12px; border: 2px solid var(--danger); background: rgba(248, 113, 113, 0.1); color: var(--danger); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; margin-bottom: 10px;">
+                        🗑️ СБРОСИТЬ МОИ ДАННЫЕ
+                    </button>
+                    <div style="text-align: center; font-size: 10px; color: var(--text-muted); margin-bottom: 16px;">
+                        Удалит ваши данные из игры и Firebase
+                    </div>
+                    
+                    <button onclick="deleteAllPlayersFromFirebase()" style="width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #ff0000; background: rgba(255, 0, 0, 0.2); color: #ff0000; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease;">
+                        💀 УДАЛИТЬ ВСЕХ ИГРОКОВ
+                    </button>
+                    <div style="text-align: center; font-size: 10px; color: var(--text-muted); margin-top: 8px;">
+                        ⚠️ Удалит ВСЕХ пользователей из Firebase
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -1724,6 +1739,90 @@
             }
         }
 
+        // Функция для удаления данных игрока из Firebase
+        async function deletePlayerFromFirebase(userId) {
+            if (!firebaseDB) {
+                console.log('Firebase не инициализирован');
+                return false;
+            }
+            
+            try {
+                const { ref, remove } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js');
+                const playerRef = ref(firebaseDB, `players/${userId}`);
+                await remove(playerRef);
+                console.log('✅ Данные игрока удалены из Firebase');
+                return true;
+            } catch (error) {
+                console.error('❌ Ошибка удаления:', error);
+                return false;
+            }
+        }
+
+        // Функция для удаления ВСЕХ игроков из Firebase
+        async function deleteAllPlayersFromFirebase() {
+            if (!confirm('⚠️ ВНИМАНИЕ! Это удалит ВСЕХ игроков из базы данных!\n\nПродолжить?')) {
+                return;
+            }
+            
+            if (!confirm('Вы АБСОЛЮТНО уверены? Это удалит данные ВСЕХ пользователей!')) {
+                return;
+            }
+            
+            if (!firebaseDB) {
+                showToast('❌ Firebase не инициализирован', 'error');
+                return;
+            }
+            
+            try {
+                const { ref, remove } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js');
+                const playersRef = ref(firebaseDB, 'players');
+                await remove(playersRef);
+                
+                showToast('✅ Все игроки удалены из Firebase!', 'success');
+                console.log('✅ Все игроки удалены из Firebase');
+                
+                // Перезагружаем страницу через 2 секунды
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+                
+            } catch (error) {
+                console.error('❌ Ошибка удаления всех игроков:', error);
+                showToast('❌ Ошибка при удалении данных', 'error');
+            }
+        }
+
+        // Функция для полного сброса игры (локально + Firebase)
+        async function resetGameCompletely() {
+            if (!confirm('⚠️ ВНИМАНИЕ! Это удалит ВСЕ ваши данные навсегда!\n\nПродолжить?')) {
+                return;
+            }
+            
+            if (!confirm('Вы уверены? Это действие НЕОБРАТИМО!')) {
+                return;
+            }
+            
+            try {
+                // Удаляем из Firebase
+                await deletePlayerFromFirebase(state.userId);
+                
+                // Очищаем localStorage
+                localStorage.removeItem('bustClickerV4');
+                localStorage.removeItem('shopLastUpdate');
+                
+                showToast('🗑️ Все данные удалены! Перезагрузите страницу.', 'success');
+                
+                // Перезагружаем страницу через 2 секунды
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Ошибка сброса:', error);
+                showToast('❌ Ошибка при сбросе данных', 'error');
+            }
+        }
+
         // ============================================
         // AUDIO ENGINE
         // ============================================
@@ -2177,11 +2276,14 @@
             base *= (effects.globalMulti || 1);
             
             // Активные эффекты из магазина/кейсов (x2, x5, x10, x20)
+            // Используем только самый сильный множитель, чтобы избежать экспоненциального роста
+            let maxMultiplier = 1;
             state.activeEffects.forEach(e => {
                 if (e.endTime > now && e.effect.type === 'multiply') {
-                    base *= e.effect.value;
+                    maxMultiplier = Math.max(maxMultiplier, e.effect.value);
                 }
             });
+            base *= maxMultiplier;
 
             // БОНУС ОТ УРОВНЯ - увеличивает итоговый урон
             // Каждый уровень даёт +1% (или больше с апгрейдом "Престижная мощь")
@@ -2454,6 +2556,16 @@
         function buyItem(item, price) {
             if (state.coins < price) return showToast('Недостаточно монет!', 'error');
             
+            // Проверяем, есть ли уже активный буст того же типа
+            if (item.effect && item.effect.type === 'multiply') {
+                const existingBoost = state.activeEffects.find(e => 
+                    e.effect.type === 'multiply' && e.endTime > Date.now()
+                );
+                if (existingBoost) {
+                    showToast(`⚠️ Уже активен буст x${existingBoost.effect.value}! Будет использован сильнейший.`, 'warning');
+                }
+            }
+            
             state.coins -= price;
             playSound('buy');
 
@@ -2536,6 +2648,16 @@
                     showToast('🛡️ Щит заблокировал дебафф!', 'success');
                     updateUI(); saveState();
                     return;
+                }
+            }
+            
+            // Проверяем, есть ли уже активный буст того же типа
+            if (reward.effect && reward.effect.type === 'multiply' && reward.duration) {
+                const existingBoost = state.activeEffects.find(e => 
+                    e.effect.type === 'multiply' && e.endTime > Date.now()
+                );
+                if (existingBoost) {
+                    showToast(`⚠️ Уже активен буст x${existingBoost.effect.value}! Будет использован сильнейший.`, 'warning');
                 }
             }
             
@@ -2783,6 +2905,17 @@
 
         function useItem(item) {
             if (item.type === 'shield' || item.type === 'passive') return;
+            
+            // Проверяем, есть ли уже активный буст того же типа
+            if (item.effect.type === 'multiply') {
+                const existingBoost = state.activeEffects.find(e => 
+                    e.effect.type === 'multiply' && e.endTime > Date.now()
+                );
+                if (existingBoost) {
+                    showToast(`⚠️ Уже активен буст x${existingBoost.effect.value}! Будет использован сильнейший.`, 'warning');
+                }
+            }
+            
             state.activeEffects.push({ ...item, endTime: Date.now() + item.duration });
             state.inventory = state.inventory.filter(i => i !== item);
             state.statsBuffsUsed++;
@@ -3052,6 +3185,15 @@
                     updateTargetScale();
                     showToast(`👑 ДЖЕКПОТ! +${sizeBonus.toLocaleString()} размера, +${coinBonus.toLocaleString()} монет!`, 'success');
                 } else if (reward.duration > 0) {
+                    // Проверяем, есть ли уже активный буст того же типа
+                    if (reward.effect.type === 'multiply') {
+                        const existingBoost = state.activeEffects.find(e => 
+                            e.effect.type === 'multiply' && e.endTime > Date.now()
+                        );
+                        if (existingBoost) {
+                            showToast(`⚠️ Уже активен буст x${existingBoost.effect.value}! Будет использован сильнейший.`, 'warning');
+                        }
+                    }
                     state.activeEffects.push({ ...reward, endTime: Date.now() + reward.duration });
                     processEffects();
                     showToast(`🎉 ${reward.name} активирован!`, 'success');
