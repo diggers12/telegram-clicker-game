@@ -1171,6 +1171,106 @@
             dailyRewardStreak: 0
         };
 
+        // Anti-autoclicker protection
+        let antiCheat = {
+            clicks: [],
+            maxClicks: 20,
+            timeWindow: 1000,
+            suspiciousThreshold: 15,
+            banThreshold: 25,
+            minInterval: 30,
+            maxCPS: 15,
+            warnings: 0,
+            isBanned: false,
+            lastWarningTime: 0,
+            
+            addClick(timestamp) {
+                this.clicks.push(timestamp);
+                if (this.clicks.length > this.maxClicks) {
+                    this.clicks.shift();
+                }
+            },
+            
+            checkPattern() {
+                if (this.isBanned) return false;
+                
+                const now = Date.now();
+                this.clicks = this.clicks.filter(t => now - t < this.timeWindow);
+                
+                if (this.clicks.length < 5) return true;
+                
+                // Check CPS (clicks per second)
+                const cps = this.clicks.length / (this.timeWindow / 1000);
+                if (cps > this.maxCPS) {
+                    this.handleSuspicious('Слишком быстрые клики');
+                    return false;
+                }
+                
+                // Check for identical intervals (bot pattern)
+                const intervals = [];
+                for (let i = 1; i < this.clicks.length; i++) {
+                    intervals.push(this.clicks[i] - this.clicks[i-1]);
+                }
+                
+                // If too many identical intervals - likely a bot
+                const identicalCount = intervals.filter((v, i, arr) => 
+                    arr.filter(x => Math.abs(x - v) < 5).length > 3
+                ).length;
+                
+                if (identicalCount > 5) {
+                    this.handleSuspicious('Обнаружен паттерн бота');
+                    return false;
+                }
+                
+                // Check for too many clicks in short time
+                if (this.clicks.length >= this.suspiciousThreshold) {
+                    const recentClicks = this.clicks.filter(t => now - t < 500);
+                    if (recentClicks.length >= 10) {
+                        this.handleSuspicious('Подозрительная активность');
+                        return false;
+                    }
+                }
+                
+                return true;
+            },
+            
+            handleSuspicious(reason) {
+                const now = Date.now();
+                
+                // Don't spam warnings
+                if (now - this.lastWarningTime < 3000) return;
+                
+                this.warnings++;
+                this.lastWarningTime = now;
+                
+                if (this.warnings >= 3) {
+                    this.ban();
+                } else {
+                    showToast(`⚠️ Предупреждение ${this.warnings}/3: ${reason}`, 'error');
+                    playSound('error');
+                }
+            },
+            
+            ban() {
+                this.isBanned = true;
+                showToast('🚫 Обнаружен автокликер! Игра заблокирована на 5 минут', 'error');
+                playSound('error');
+                
+                // Unban after 5 minutes
+                setTimeout(() => {
+                    this.isBanned = false;
+                    this.warnings = 0;
+                    this.clicks = [];
+                    showToast('✅ Блокировка снята. Играйте честно!', 'success');
+                }, 300000); // 5 minutes
+            },
+            
+            reset() {
+                this.clicks = [];
+                this.warnings = 0;
+            }
+        };
+
         // ============================================
         // UPGRADES SYSTEM
         // ============================================
@@ -3193,106 +3293,6 @@
             
             // Инициализация Firebase
             initFirebase();
-            
-            // Anti-autoclicker protection
-            const antiCheat = {
-                clicks: [],
-                maxClicks: 20,
-                timeWindow: 1000,
-                suspiciousThreshold: 15,
-                banThreshold: 25,
-                minInterval: 30,
-                maxCPS: 15,
-                warnings: 0,
-                isBanned: false,
-                lastWarningTime: 0,
-                
-                addClick(timestamp) {
-                    this.clicks.push(timestamp);
-                    if (this.clicks.length > this.maxClicks) {
-                        this.clicks.shift();
-                    }
-                },
-                
-                checkPattern() {
-                    if (this.isBanned) return false;
-                    
-                    const now = Date.now();
-                    this.clicks = this.clicks.filter(t => now - t < this.timeWindow);
-                    
-                    if (this.clicks.length < 5) return true;
-                    
-                    // Check CPS (clicks per second)
-                    const cps = this.clicks.length / (this.timeWindow / 1000);
-                    if (cps > this.maxCPS) {
-                        this.handleSuspicious('Слишком быстрые клики');
-                        return false;
-                    }
-                    
-                    // Check for identical intervals (bot pattern)
-                    const intervals = [];
-                    for (let i = 1; i < this.clicks.length; i++) {
-                        intervals.push(this.clicks[i] - this.clicks[i-1]);
-                    }
-                    
-                    // If too many identical intervals - likely a bot
-                    const identicalCount = intervals.filter((v, i, arr) => 
-                        arr.filter(x => Math.abs(x - v) < 5).length > 3
-                    ).length;
-                    
-                    if (identicalCount > 5) {
-                        this.handleSuspicious('Обнаружен паттерн бота');
-                        return false;
-                    }
-                    
-                    // Check for too many clicks in short time
-                    if (this.clicks.length >= this.suspiciousThreshold) {
-                        const recentClicks = this.clicks.filter(t => now - t < 500);
-                        if (recentClicks.length >= 10) {
-                            this.handleSuspicious('Подозрительная активность');
-                            return false;
-                        }
-                    }
-                    
-                    return true;
-                },
-                
-                handleSuspicious(reason) {
-                    const now = Date.now();
-                    
-                    // Don't spam warnings
-                    if (now - this.lastWarningTime < 3000) return;
-                    
-                    this.warnings++;
-                    this.lastWarningTime = now;
-                    
-                    if (this.warnings >= 3) {
-                        this.ban();
-                    } else {
-                        showToast(`⚠️ Предупреждение ${this.warnings}/3: ${reason}`, 'error');
-                        playSound('error');
-                    }
-                },
-                
-                ban() {
-                    this.isBanned = true;
-                    showToast('🚫 Обнаружен автокликер! Игра заблокирована на 5 минут', 'error');
-                    playSound('error');
-                    
-                    // Unban after 5 minutes
-                    setTimeout(() => {
-                        this.isBanned = false;
-                        this.warnings = 0;
-                        this.clicks = [];
-                        showToast('✅ Блокировка снята. Играйте честно!', 'success');
-                    }, 300000); // 5 minutes
-                },
-                
-                reset() {
-                    this.clicks = [];
-                    this.warnings = 0;
-                }
-            };
             
             els = {
                 userAvatar: document.getElementById('userAvatar'),
