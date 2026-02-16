@@ -2517,6 +2517,7 @@
                         coins: state.coins,
                         time: state.totalPlayTime,
                         achievements: state.unlockedAchievements,
+                        photoUrl: player.photoUrl || null, // Берём фото из Firebase
                         isCurrentUser: true
                     });
                 } else {
@@ -2529,6 +2530,13 @@
             
             // Если текущего игрока нет в списке - добавляем
             if (!allPlayers.some(p => p.userId === state.userId)) {
+                // Получаем фото из Telegram
+                const tg = window.Telegram?.WebApp;
+                let photoUrl = null;
+                if (tg && tg.initDataUnsafe?.user?.photo_url) {
+                    photoUrl = tg.initDataUnsafe.user.photo_url;
+                }
+                
                 allPlayers.push({
                     userId: state.userId,
                     name: state.userName,
@@ -2536,6 +2544,7 @@
                     coins: state.coins,
                     time: state.totalPlayTime,
                     achievements: state.unlockedAchievements,
+                    photoUrl: photoUrl,
                     isCurrentUser: true
                 });
             }
