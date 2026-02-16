@@ -1563,26 +1563,35 @@
         
         // Функция для получения топа игроков из Firebase
         async function fetchLeaderboard() {
+            console.log('🔄 [fetchLeaderboard] Начало загрузки...');
+            
             if (!firebaseDB) {
-                console.log('Firebase не инициализирован');
+                console.error('❌ Firebase не инициализирован');
                 return [];
             }
             
             try {
-                console.log('🔄 Загрузка топа игроков...');
+                console.log('� Отправка запроса к Firebase...');
                 const dbRef = ref(firebaseDB);
                 const snapshot = await get(child(dbRef, 'players'));
                 
+                console.log('� Получен snapshot:', snapshot);
+                console.log('📦 snapshot.exists():', snapshot.exists());
+                
                 if (!snapshot.exists()) {
-                    console.log('📭 Нет данных игроков');
+                    console.warn('📭 Нет данных в Firebase (snapshot.exists() = false)');
                     return [];
                 }
                 
                 const playersData = snapshot.val();
+                console.log('📊 Данные из Firebase:', playersData);
+                console.log('📊 Количество ключей:', Object.keys(playersData || {}).length);
+                
                 const players = [];
                 
                 for (const userId in playersData) {
                     const player = playersData[userId];
+                    console.log(`👤 Игрок ${userId}:`, player);
                     players.push({
                         userId: userId,
                         name: player.name || 'Игрок',
@@ -1599,12 +1608,14 @@
                 LEADERBOARD_DATA = players;
                 console.log(`✅ Загружено игроков: ${players.length}`);
                 if (players.length > 0) {
-                    console.log('Топ-3:', players.slice(0, 3).map(p => `${p.name}: ${p.size}`));
+                    console.log('🏆 Топ-3:', players.slice(0, 3).map(p => `${p.name}: ${p.size}`));
                 }
                 return players;
                 
             } catch (error) {
                 console.error('❌ Ошибка загрузки топа:', error);
+                console.error('❌ Детали ошибки:', error.message);
+                console.error('❌ Stack:', error.stack);
                 return [];
             }
         }
@@ -2478,7 +2489,9 @@
             // Получаем данные других игроков из Firebase
             const otherPlayers = await fetchLeaderboard();
             
-            console.log(`📊 Получено игроков из Firebase: ${otherPlayers.length}`);
+            // ДЕБАГ: Показываем сколько игроков загружено
+            const debugInfo = `Загружено из Firebase: ${otherPlayers.length} игроков`;
+            console.log(`📊 ${debugInfo}`);
             
             // Создаём список всех игроков
             const allPlayers = [];
@@ -2536,6 +2549,30 @@
             
             els.leaderboardList.innerHTML = '';
             
+            // ДЕБАГ: Добавляем информацию о загрузке
+            if (otherPlayers.length === 0) {
+                const debugDiv = document.createElement('div');
+                debugDiv.style.cssText = 'background: #ff4d4d; color: white; padding: 10px; margin: 10px; border-radius: 8px; font-size: 11px;';
+                debugDiv.innerHTML = `
+                    <strong>⚠️ ДЕБАГ:</strong><br>
+                    Firebase вернул 0 игроков!<br>
+                    Проверь правила Firebase:<br>
+                    <code style="background: rgba(0,0,0,0.3); padding: 2px 4px; border-radius: 3px;">
+                    {<br>
+                    &nbsp;&nbsp;"rules": {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;"players": {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"$userId": {<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".read": true,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;".write": true<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;}<br>
+                    }
+                    </code>
+                `;
+                els.leaderboardList.appendChild(debugDiv);
+            }
+            
             // Показываем топ-100
             const topPlayers = allPlayers.slice(0, 100);
             
@@ -2568,7 +2605,7 @@
             if (allPlayers.length === 1) {
                 const hint = document.createElement('div');
                 hint.style.cssText = 'text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px;';
-                hint.innerHTML = '👥 Пока ты один в топе!<br>Скоро появятся другие игроки.';
+                hint.innerHTML = `👥 Пока ты один в топе!<br>Скоро появятся другие игроки.<br><br><small style="color: var(--text-muted);">(Firebase: ${otherPlayers.length} игроков)</small>`;
                 els.leaderboardList.appendChild(hint);
             }
         }
@@ -3225,7 +3262,7 @@
             // Handle window resize for Three.js
             window.addEventListener('resize', () => {
                 const rect = els.modelContainer.getBoundingClientRect();
-                if (camera && renderer) {
+                if (camera && renderer) {я
                     camera.aspect = rect.width / rect.height;
                     camera.updateProjectionMatrix();
                     renderer.setSize(rect.width, rect.height);
