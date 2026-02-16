@@ -1116,7 +1116,8 @@
         const DAILY_REWARD_COOLDOWN = 24 * 60 * 60 * 1000; // 24 часа
         
         // API сервер (твой бот на хостинге)
-        const API_URL = 'http://f1.rustix.me:33295';
+        // Отключено - используем Telegram Cloud Storage
+        const API_URL = null; // 'http://f1.rustix.me:33295';
 
         const DAILY_REWARDS = [
             // Обычные (70% шанс)
@@ -1533,41 +1534,86 @@
             legendary: { bg: 'linear-gradient(135deg, #ff4d8d, #f43f5e)', border: '#ff4d8d', cls: 'RARITY-LEGENDARY' }
         };
 
-        // Здесь будут данные других игроков из бэкенда
+        // Здесь будут данные других игроков из Telegram Cloud Storage
         let LEADERBOARD_DATA = [];
         
-        // Функция для получения топа игроков
+        // Функция для получения топа игроков из Telegram Cloud Storage
         async function fetchLeaderboard() {
             try {
-                const response = await fetch(`${API_URL}/api/leaderboard`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    LEADERBOARD_DATA = data.players || [];
-                    return LEADERBOARD_DATA;
+                const tg = window.Telegram?.WebApp;
+                if (!tg || !tg.CloudStorage) {
+                    console.log('Telegram Cloud Storage недоступен');
+                    return [];
                 }
+                
+                // Получаем список всех игроков из облака
+                return new Promise((resolve) => {
+                    tg.CloudStorage.getItem('leaderboard', (error, value) => {
+                        if (error || !value) {
+                            console.log('Топ игроков пуст');
+                            resolve([]);
+                            return;
+                        }
+                        
+                        try {
+                            const players = JSON.parse(value);
+                            LEADERBOARD_DATA = players || [];
+                            resolve(LEADERBOARD_DATA);
+                        } catch (e) {
+                            console.error('Ошибка парсинга топа:', e);
+                            resolve([]);
+                        }
+                    });
+                });
             } catch (error) {
                 console.error('Ошибка загрузки топа:', error);
+                return [];
             }
-            
-            return [];
         }
         
-        // Функция для отправки своей статистики на сервер
+        // Функция для отправки своей статистики в Telegram Cloud Storage
         async function syncPlayerData() {
             try {
-                await fetch(`${API_URL}/api/sync`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userId: state.userId,
-                        name: state.userName,
-                        size: state.size,
-                        coins: state.coins,
-                        time: state.totalPlayTime,
-                        achievements: state.unlockedAchievements
-                    })
+                const tg = window.Telegram?.WebApp;
+                if (!tg || !tg.CloudStorage) {
+                    console.log('Telegram Cloud Storage недоступен');
+                    return;
+                }
+                
+                // Получаем текущий топ
+                const currentLeaderboard = await fetchLeaderboard();
+                
+                // Обновляем или добавляем текущего игрока
+                const playerIndex = currentLeaderboard.findIndex(p => p.userId === state.userId);
+                const playerData = {
+                    userId: state.userId,
+                    name: state.userName,
+                    size: state.size,
+                    coins: state.coins,
+                    time: state.totalPlayTime,
+                    achievements: state.unlockedAchievements,
+                    lastUpdate: Date.now()
+                };
+                
+                if (playerIndex >= 0) {
+                    currentLeaderboard[playerIndex] = playerData;
+                } else {
+                    currentLeaderboard.push(playerData);
+                }
+                
+                // Сортируем по размеру и оставляем топ-100
+                currentLeaderboard.sort((a, b) => b.size - a.size);
+                const top100 = currentLeaderboard.slice(0, 100);
+                
+                // Сохраняем обратно в облако
+                tg.CloudStorage.setItem('leaderboard', JSON.stringify(top100), (error) => {
+                    if (error) {
+                        console.error('Ошибка сохранения в облако:', error);
+                    } else {
+                        console.log('Данные синхронизированы с облаком');
+                    }
                 });
+                
             } catch (error) {
                 console.error('Ошибка синхронизации:', error);
             }
