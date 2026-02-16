@@ -1511,6 +1511,65 @@
             { id: 'level10', name: 'Опытный', desc: 'Достигни 10 уровня', icon: 'Lv', condition: s => getLevel() >= 10 },
             { id: 'upgrade5', name: 'Апгрейдер', desc: 'Купи 5 апгрейдов', icon: '⬆', condition: s => Object.values(s.upgrades).reduce((a, b) => a + b, 0) >= 5 },
             { id: 'upgrade20', name: 'Мастер прокачки', desc: 'Купи 20 апгрейдов', icon: '🔝', condition: s => Object.values(s.upgrades).reduce((a, b) => a + b, 0) >= 20 },
+            
+            // Дополнительные достижения
+            { id: 'click10', name: 'Новичок', desc: 'Сделай 10 кликов', icon: '👋', condition: s => s.totalClicks >= 10 },
+            { id: 'click50', name: 'Активный', desc: 'Сделай 50 кликов', icon: '👏', condition: s => s.totalClicks >= 50 },
+            { id: 'click500', name: 'Упорный', desc: 'Сделай 500 кликов', icon: '🔥', condition: s => s.totalClicks >= 500 },
+            { id: 'click2500', name: 'Профи', desc: 'Сделай 2500 кликов', icon: '💫', condition: s => s.totalClicks >= 2500 },
+            { id: 'click25000', name: 'Бог кликов', desc: 'Сделай 25,000 кликов', icon: '👑', condition: s => s.totalClicks >= 25000 },
+            { id: 'click50000', name: 'Абсолют', desc: 'Сделай 50,000 кликов', icon: '💎', condition: s => s.totalClicks >= 50000 },
+            { id: 'click100000', name: 'Бесконечность', desc: 'Сделай 100,000 кликов', icon: '♾️', condition: s => s.totalClicks >= 100000 },
+            
+            { id: 'size50', name: 'Растущий', desc: 'Достигни размера 50', icon: '🌿', condition: s => s.size >= 50 },
+            { id: 'size500', name: 'Внушительный', desc: 'Достигни размера 500', icon: '🏔️', condition: s => s.size >= 500 },
+            { id: 'size2500', name: 'Колоссальный', desc: 'Достигни размера 2500', icon: '🌋', condition: s => s.size >= 2500 },
+            { id: 'size25000', name: 'Титан', desc: 'Достигни размера 25,000', icon: '🦾', condition: s => s.size >= 25000 },
+            { id: 'size50000', name: 'Гигант', desc: 'Достигни размера 50,000', icon: '🗿', condition: s => s.size >= 50000 },
+            { id: 'size100000', name: 'Вселенная', desc: 'Достигни размера 100,000', icon: '🌌', condition: s => s.size >= 100000 },
+            { id: 'size500000', name: 'Мультивселенная', desc: 'Достигни размера 500,000', icon: '🌠', condition: s => s.size >= 500000 },
+            { id: 'size1000000', name: 'Бесконечность', desc: 'Достигни размера 1,000,000', icon: '✨', condition: s => s.size >= 1000000 },
+            
+            { id: 'coins100', name: 'Копилка', desc: 'Собери 100 монет', icon: '🪙', condition: s => s.coins >= 100 },
+            { id: 'coins1000', name: 'Сбережения', desc: 'Собери 1,000 монет', icon: '💰', condition: s => s.coins >= 1000 },
+            { id: 'coins50k', name: 'Состоятельный', desc: 'Собери 50,000 монет', icon: '💸', condition: s => s.coins >= 50000 },
+            { id: 'coins100k', name: 'Магнат', desc: 'Собери 100,000 монет', icon: '🤑', condition: s => s.coins >= 100000 },
+            { id: 'coins500k', name: 'Олигарх', desc: 'Собери 500,000 монет', icon: '💎', condition: s => s.coins >= 500000 },
+            
+            { id: 'time5m', name: 'Любопытный', desc: 'Играй 5 минут', icon: '⏱️', condition: s => s.totalPlayTime >= 300000 },
+            { id: 'time30m', name: 'Увлеченный', desc: 'Играй 30 минут', icon: '🕐', condition: s => s.totalPlayTime >= 1800000 },
+            { id: 'time3h', name: 'Фанат', desc: 'Играй 3 часа', icon: '🕒', condition: s => s.totalPlayTime >= 10800000 },
+            { id: 'time24h', name: 'Марафонец', desc: 'Играй 24 часа', icon: '🏃', condition: s => s.totalPlayTime >= 86400000 },
+            
+            { id: 'case1', name: 'Первый кейс', desc: 'Открой первый кейс', icon: '📦', condition: s => s.statsCases >= 1 },
+            { id: 'case5', name: 'Везунчик', desc: 'Открой 5 кейсов', icon: '🎁', condition: s => s.statsCases >= 5 },
+            { id: 'case25', name: 'Коллекционер', desc: 'Открой 25 кейсов', icon: '🎰', condition: s => s.statsCases >= 25 },
+            { id: 'case100', name: 'Зависимый', desc: 'Открой 100 кейсов', icon: '🎪', condition: s => s.statsCases >= 100 },
+            
+            { id: 'exchange1', name: 'Первый обмен', desc: 'Обменяй размер на монеты', icon: '🔄', condition: s => s.statsExchanges >= 1 },
+            { id: 'exchange10', name: 'Меняла', desc: 'Сделай 10 обменов', icon: '💱', condition: s => s.statsExchanges >= 10 },
+            { id: 'exchange50', name: 'Биржевик', desc: 'Сделай 50 обменов', icon: '📈', condition: s => s.statsExchanges >= 50 },
+            
+            { id: 'buff1', name: 'Первый бафф', desc: 'Используй первый бафф', icon: '⚗️', condition: s => s.statsBuffsUsed >= 1 },
+            { id: 'buff5', name: 'Алхимик', desc: 'Используй 5 баффов', icon: '🧪', condition: s => s.statsBuffsUsed >= 5 },
+            { id: 'buff25', name: 'Зельевар', desc: 'Используй 25 баффов', icon: '🧙', condition: s => s.statsBuffsUsed >= 25 },
+            
+            { id: 'level5', name: 'Новичок', desc: 'Достигни 5 уровня', icon: '5️⃣', condition: s => getLevel() >= 5 },
+            { id: 'level20', name: 'Ветеран', desc: 'Достигни 20 уровня', icon: '2️⃣0️⃣', condition: s => getLevel() >= 20 },
+            { id: 'level30', name: 'Эксперт', desc: 'Достигни 30 уровня', icon: '3️⃣0️⃣', condition: s => getLevel() >= 30 },
+            { id: 'level50', name: 'Мастер', desc: 'Достигни 50 уровня', icon: '5️⃣0️⃣', condition: s => getLevel() >= 50 },
+            { id: 'level100', name: 'Легенда', desc: 'Достигни 100 уровня', icon: '💯', condition: s => getLevel() >= 100 },
+            
+            { id: 'upgrade1', name: 'Первый апгрейд', desc: 'Купи первый апгрейд', icon: '⬆️', condition: s => Object.values(s.upgrades).reduce((a, b) => a + b, 0) >= 1 },
+            { id: 'upgrade10', name: 'Оптимизатор', desc: 'Купи 10 апгрейдов', icon: '📈', condition: s => Object.values(s.upgrades).reduce((a, b) => a + b, 0) >= 10 },
+            { id: 'upgrade50', name: 'Максималист', desc: 'Купи 50 апгрейдов', icon: '🚀', condition: s => Object.values(s.upgrades).reduce((a, b) => a + b, 0) >= 50 },
+            { id: 'upgrade100', name: 'Перфекционист', desc: 'Купи 100 апгрейдов', icon: '✨', condition: s => Object.values(s.upgrades).reduce((a, b) => a + b, 0) >= 100 },
+            
+            { id: 'daily1', name: 'Ежедневник', desc: 'Получи ежедневную награду', icon: '📅', condition: s => s.dailyStreak >= 1 },
+            { id: 'daily7', name: 'Неделя', desc: 'Серия 7 дней', icon: '📆', condition: s => s.dailyStreak >= 7 },
+            { id: 'daily30', name: 'Месяц', desc: 'Серия 30 дней', icon: '🗓️', condition: s => s.dailyStreak >= 30 },
+            { id: 'speedster', name: 'Спидранер', desc: 'Достигни размера 1000 за 10 минут', icon: '⚡', condition: s => s.size >= 1000 && s.totalPlayTime <= 600000 },
+            { id: 'patient', name: 'Терпеливый', desc: 'Играй без кликов 5 минут', icon: '🧘', condition: s => s.totalPlayTime >= 300000 && s.totalClicks === 0 },
         ];
 
         const SHOP_DB = [
@@ -2129,6 +2188,12 @@
         }
 
         function handleClick(e) {
+            // Check if banned by anti-cheat
+            if (antiCheat && antiCheat.isBanned) {
+                showToast('🚫 Вы заблокированы за использование автокликера', 'error');
+                return;
+            }
+            
             if (isFrozen()) {
                 showToast('Заморожено! ❄️', 'error');
                 return;
@@ -3223,14 +3288,155 @@
 
             initThree();
             
+            // Anti-autoclicker protection
+            const antiCheat = {
+                clicks: [],
+                maxClicks: 20,
+                timeWindow: 1000,
+                suspiciousThreshold: 15,
+                banThreshold: 25,
+                minInterval: 30,
+                maxCPS: 15,
+                warnings: 0,
+                isBanned: false,
+                lastWarningTime: 0,
+                
+                addClick(timestamp) {
+                    this.clicks.push(timestamp);
+                    if (this.clicks.length > this.maxClicks) {
+                        this.clicks.shift();
+                    }
+                },
+                
+                checkPattern() {
+                    if (this.isBanned) return false;
+                    
+                    const now = Date.now();
+                    this.clicks = this.clicks.filter(t => now - t < this.timeWindow);
+                    
+                    if (this.clicks.length < 5) return true;
+                    
+                    // Check CPS (clicks per second)
+                    const cps = this.clicks.length / (this.timeWindow / 1000);
+                    if (cps > this.maxCPS) {
+                        this.handleSuspicious('Слишком быстрые клики');
+                        return false;
+                    }
+                    
+                    // Check for identical intervals (bot pattern)
+                    const intervals = [];
+                    for (let i = 1; i < this.clicks.length; i++) {
+                        intervals.push(this.clicks[i] - this.clicks[i-1]);
+                    }
+                    
+                    // If too many identical intervals - likely a bot
+                    const identicalCount = intervals.filter((v, i, arr) => 
+                        arr.filter(x => Math.abs(x - v) < 5).length > 3
+                    ).length;
+                    
+                    if (identicalCount > 5) {
+                        this.handleSuspicious('Обнаружен паттерн бота');
+                        return false;
+                    }
+                    
+                    // Check for too many clicks in short time
+                    if (this.clicks.length >= this.suspiciousThreshold) {
+                        const recentClicks = this.clicks.filter(t => now - t < 500);
+                        if (recentClicks.length >= 10) {
+                            this.handleSuspicious('Подозрительная активность');
+                            return false;
+                        }
+                    }
+                    
+                    return true;
+                },
+                
+                handleSuspicious(reason) {
+                    const now = Date.now();
+                    
+                    // Don't spam warnings
+                    if (now - this.lastWarningTime < 3000) return;
+                    
+                    this.warnings++;
+                    this.lastWarningTime = now;
+                    
+                    if (this.warnings >= 3) {
+                        this.ban();
+                    } else {
+                        showToast(`⚠️ Предупреждение ${this.warnings}/3: ${reason}`, 'error');
+                        playSound('error');
+                    }
+                },
+                
+                ban() {
+                    this.isBanned = true;
+                    showToast('🚫 Обнаружен автокликер! Игра заблокирована на 5 минут', 'error');
+                    playSound('error');
+                    
+                    // Unban after 5 minutes
+                    setTimeout(() => {
+                        this.isBanned = false;
+                        this.warnings = 0;
+                        this.clicks = [];
+                        showToast('✅ Блокировка снята. Играйте честно!', 'success');
+                    }, 300000); // 5 minutes
+                },
+                
+                reset() {
+                    this.clicks = [];
+                    this.warnings = 0;
+                }
+            };
+            
             // Events
             let lastClickTime = 0;
             els.modelContainer.addEventListener('click', (e) => {
                 const now = Date.now();
-                if (now - lastClickTime < 50) return; // Debounce
+                
+                // Basic debounce
+                if (now - lastClickTime < 50) return;
+                
+                // Anti-cheat check
+                antiCheat.addClick(now);
+                if (!antiCheat.checkPattern()) {
+                    return;
+                }
+                
                 lastClickTime = now;
                 window.haptic('light');
                 handleClick(e);
+            });
+            
+            // Additional touch event protection for mobile autoclickers
+            let touchStartTime = 0;
+            let touchCount = 0;
+            let lastTouchTime = 0;
+            
+            els.modelContainer.addEventListener('touchstart', (e) => {
+                touchStartTime = Date.now();
+                
+                // Check for rapid touch spam
+                if (touchStartTime - lastTouchTime < 40) {
+                    touchCount++;
+                    if (touchCount > 8) {
+                        antiCheat.handleSuspicious('Быстрые тапы');
+                        e.preventDefault();
+                        return false;
+                    }
+                } else {
+                    touchCount = 0;
+                }
+                
+                lastTouchTime = touchStartTime;
+            }, { passive: false });
+            
+            els.modelContainer.addEventListener('touchend', (e) => {
+                const touchDuration = Date.now() - touchStartTime;
+                
+                // Detect instant taps (likely bot)
+                if (touchDuration < 10) {
+                    antiCheat.handleSuspicious('Мгновенные тапы');
+                }
             });
             
             els.exchangeBtn.addEventListener('click', () => {
