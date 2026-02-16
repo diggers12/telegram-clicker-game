@@ -2855,17 +2855,6 @@
                 pill.textContent = `${eff.icon} ${formatTime(Math.max(0, eff.endTime - now))}`;
                 els.activeEffectsBar.appendChild(pill);
             });
-            
-            // Показываем индикатор подозрительности (только для отладки, можно убрать)
-            if (antiCheat && antiCheat.suspicionScore > 0) {
-                const suspPill = document.createElement('div');
-                suspPill.className = 'effect-pill debuff';
-                const score = Math.round(antiCheat.suspicionScore);
-                suspPill.textContent = `⚠️ ${score}%`;
-                suspPill.style.opacity = '0.6';
-                suspPill.title = 'Уровень подозрительности';
-                els.activeEffectsBar.appendChild(suspPill);
-            }
         }
 
         function closeModal() {
@@ -3309,36 +3298,76 @@
             initThree();
             
             // ============================================
-            // ИНИЦИАЛИЗАЦИЯ ANTI-AUTOCLICKER
+            // ПРОСТАЯ СИСТЕМА RATE LIMITING (как в Hamster Combat)
             // ============================================
             
-            antiCheat = new AntiAutoClicker(
-                els.modelContainer,
-                // ✅ Валидный клик
-                (clickData) => {
-                    handleClick({
-                        clientX: clickData.x,
-                        clientY: clickData.y,
-                        target: els.modelContainer
-                    });
-                },
-                // 🚫 Обнаружен читер
-                (cheatData) => {
-                    console.warn('🚨 Cheat detected!', cheatData);
-                    showToast('⚠️ Подозрительная активность обнаружена!', 'error');
-                    
-                    // Haptic feedback через Telegram API
-                    if (window.Telegram?.WebApp) {
-                        window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
+            // Настройки
+            const MAX_CLICKS_PER_SECOND = 20;  // Максимум 20 кликов в секунду
+            let clickQueue = [];
+            
+            // Функция проверки лимита
+            function canProcessClick() {
+                const now = Date.now();
+                const oneSecondAgo = now - 1000;
+                
+                // Очищаем старые клики
+                clickQueue = clickQueue.filter(time => time > oneSecondAgo);
+                
+                // Проверяем лимит
+                if (clickQueue.length >= MAX_CLICKS_PER_SECOND) {
+                    return false;  // Лимит достигнут - клик не засчитывается
+                }
+                
+                // Добавляем клик в очередь
+                clickQueue.push(now);
+                return true;  // Клик засчитан
+            }
+            
+            // Обработчики событий с rate limiting
+            els.modelContainer.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                
+                // Обрабатываем каждое касание
+                for (const touch of e.changedTouches) {
+                    if (canProcessClick()) {
+                        window.haptic('light');
+                        handleClick({
+                            clientX: touch.clientX,
+                            clientY: touch.clientY,
+                            target: e.target
+                        });
                     }
                 }
-            );
+            }, { passive: false });
             
-            // Устанавливаем чувствительность (medium - сбалансированная)
-            antiCheat.setSensitivity('medium');
+            els.modelContainer.addEventListener('touchend', (e) => {
+                e.preventDefault();
+            }, { passive: false });
             
-            // Удаляем старые обработчики событий - AntiAutoClicker сам управляет ими
-            // Events теперь обрабатываются внутри AntiAutoClicker
+            els.modelContainer.addEventListener('touchcancel', (e) => {
+                e.preventDefault();
+            }, { passive: false });
+            
+            els.modelContainer.addEventListener('mousedown', (e) => {
+                if (canProcessClick()) {
+                    window.haptic('light');
+                    handleClick(e);
+                }
+            });
+            
+            els.modelContainer.addEventListener('contextmenu', (e) => e.preventDefault());
+            
+            // Для совместимости создаем объект antiCheat
+            antiCheat = {
+                isBlocked: false,
+                suspicionScore: 0,
+                getStats: () => ({
+                    currentCPS: clickQueue.filter(t => Date.now() - t < 1000).length,
+                    maxCPS: MAX_CLICKS_PER_SECOND
+                })
+            };
+            
+            console.log(`✅ Rate Limiting активирован: макс ${MAX_CLICKS_PER_SECOND} CPS`);
             
             els.exchangeBtn.addEventListener('click', () => {
                 window.haptic('medium');
