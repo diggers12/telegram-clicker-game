@@ -1077,6 +1077,9 @@
 
     <div class="toast" id="toast"></div>
 
+    <!-- Anti-AutoClicker System -->
+    <script src="anti-autoclicker.js"></script>
+
     <script type="module">
         import * as THREE from 'three';
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
@@ -1171,172 +1174,11 @@
             dailyRewardStreak: 0
         };
 
-        // Anti-autoclicker protection - УМНАЯ система с поддержкой мультитача
-        let antiCheat = {
-            clicks: [],
-            touchPoints: new Map(), // Отслеживание точек касания
-            maxClicks: 100,
-            timeWindow: 3000,  // 3 секунды для анализа
-            warnings: 0,
-            isBanned: false,
-            lastWarningTime: 0,
-            suspicionScore: 0,  // Накопительный счет подозрительности
-            
-            addClick(timestamp, x, y) {
-                this.clicks.push({ time: timestamp, x: x || 0, y: y || 0 });
-                if (this.clicks.length > this.maxClicks) {
-                    this.clicks.shift();
-                }
-            },
-            
-            // Вычисление стандартного отклонения
-            calculateStdDev(values) {
-                if (values.length < 2) return Infinity;
-                const mean = values.reduce((a, b) => a + b, 0) / values.length;
-                const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
-                return Math.sqrt(variance);
-            },
-            
-            // Проверка разнообразия позиций кликов
-            checkClickPositionVariety(clicks) {
-                if (clicks.length < 10) return true;
-                
-                const positions = clicks.map(c => ({ x: c.x, y: c.y }));
-                const uniquePositions = new Set(positions.map(p => `${Math.floor(p.x/10)},${Math.floor(p.y/10)}`));
-                
-                // Если все клики в одной точке (с точностью 10px) - подозрительно
-                return uniquePositions.size > 1;
-            },
-            
-            checkPattern() {
-                if (this.isBanned) return false;
-                
-                const now = Date.now();
-                this.clicks = this.clicks.filter(c => now - c.time < this.timeWindow);
-                
-                // Нужно минимум 30 кликов для серьезного анализа
-                if (this.clicks.length < 30) {
-                    this.suspicionScore = Math.max(0, this.suspicionScore - 1); // Уменьшаем подозрительность
-                    return true;
-                }
-                
-                // Вычисляем интервалы
-                const intervals = [];
-                for (let i = 1; i < this.clicks.length; i++) {
-                    intervals.push(this.clicks[i].time - this.clicks[i-1].time);
-                }
-                
-                // 1. Проверка стандартного отклонения
-                const stdDev = this.calculateStdDev(intervals);
-                const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-                const cv = stdDev / mean;
-                
-                let suspicionPoints = 0;
-                
-                // Коэффициент вариации < 0.08 = очень подозрительно
-                if (cv < 0.08) {
-                    suspicionPoints += 3;
-                } else if (cv < 0.12) {
-                    suspicionPoints += 1;
-                }
-                
-                // 2. Проверка на нечеловеческую скорость (более 30 CPS устойчиво)
-                const cps = this.clicks.length / (this.timeWindow / 1000);
-                if (cps > 30) {
-                    suspicionPoints += 2;
-                }
-                
-                // 3. Проверка идентичных интервалов (точность 1ms)
-                let perfectMatches = 0;
-                for (let i = 0; i < intervals.length - 1; i++) {
-                    for (let j = i + 1; j < intervals.length; j++) {
-                        if (Math.abs(intervals[i] - intervals[j]) <= 1) {
-                            perfectMatches++;
-                        }
-                    }
-                }
-                
-                const matchRatio = perfectMatches / (intervals.length * (intervals.length - 1) / 2);
-                if (matchRatio > 0.5) {
-                    suspicionPoints += 3;
-                } else if (matchRatio > 0.3) {
-                    suspicionPoints += 1;
-                }
-                
-                // 4. Проверка разнообразия позиций
-                if (!this.checkClickPositionVariety(this.clicks)) {
-                    suspicionPoints += 2;
-                }
-                
-                // 5. Проверка на "идеальные" интервалы (кратные 10ms, 50ms, 100ms)
-                const roundIntervals = intervals.filter(i => i % 10 === 0 || i % 50 === 0 || i % 100 === 0);
-                if (roundIntervals.length / intervals.length > 0.7) {
-                    suspicionPoints += 2;
-                }
-                
-                // Накопительная система подозрительности
-                this.suspicionScore += suspicionPoints;
-                
-                // Естественное снижение подозрительности со временем
-                if (suspicionPoints === 0) {
-                    this.suspicionScore = Math.max(0, this.suspicionScore - 2);
-                }
-                
-                // Логирование для отладки
-                if (suspicionPoints > 0) {
-                    console.log(`[AntiCheat] CV: ${cv.toFixed(3)}, CPS: ${cps.toFixed(1)}, Match: ${(matchRatio*100).toFixed(1)}%, Score: ${this.suspicionScore}`);
-                }
-                
-                // Только при высоком счете подозрительности выдаем предупреждение
-                if (this.suspicionScore >= 15) {
-                    this.handleSuspicious(`Подозрительная активность (Score: ${this.suspicionScore})`);
-                    this.suspicionScore = 10; // Сбрасываем, но не до нуля
-                    return false;
-                }
-                
-                return true;
-            },
-            
-            handleSuspicious(reason) {
-                const now = Date.now();
-                
-                // Не спамим предупреждениями (10 секунд между ними)
-                if (now - this.lastWarningTime < 10000) return;
-                
-                this.warnings++;
-                this.lastWarningTime = now;
-                
-                console.log(`[AntiCheat] ${reason}`);
-                
-                // Только после 4 предупреждений - бан
-                if (this.warnings >= 4) {
-                    this.ban();
-                } else {
-                    showToast(`⚠️ Подозрительная активность ${this.warnings}/4`, 'error');
-                }
-            },
-            
-            ban() {
-                this.isBanned = true;
-                showToast('🚫 Обнаружен автокликер! Блокировка на 2 минуты', 'error');
-                playSound('error');
-                
-                // Разбан через 2 минуты
-                setTimeout(() => {
-                    this.isBanned = false;
-                    this.warnings = 0;
-                    this.clicks = [];
-                    this.suspicionScore = 0;
-                    showToast('✅ Блокировка снята', 'success');
-                }, 120000);
-            },
-            
-            reset() {
-                this.clicks = [];
-                this.warnings = 0;
-                this.suspicionScore = 0;
-            }
-        };
+        // ============================================
+        // ANTI-AUTOCLICKER SYSTEM
+        // ============================================
+        
+        let antiCheat = null;
 
         // ============================================
         // UPGRADES SYSTEM
@@ -2355,9 +2197,9 @@
         }
 
         function handleClick(e) {
-            // Check if banned by anti-cheat
-            if (antiCheat && antiCheat.isBanned) {
-                showToast('🚫 Вы заблокированы за использование автокликера', 'error');
+            // Check if blocked by anti-cheat
+            if (antiCheat && antiCheat.isBlocked) {
+                showToast('🚫 Подозрительная активность обнаружена. Подождите...', 'error');
                 return;
             }
             
@@ -3013,6 +2855,17 @@
                 pill.textContent = `${eff.icon} ${formatTime(Math.max(0, eff.endTime - now))}`;
                 els.activeEffectsBar.appendChild(pill);
             });
+            
+            // Показываем индикатор подозрительности (только для отладки, можно убрать)
+            if (antiCheat && antiCheat.suspicionScore > 0) {
+                const suspPill = document.createElement('div');
+                suspPill.className = 'effect-pill debuff';
+                const score = Math.round(antiCheat.suspicionScore);
+                suspPill.textContent = `⚠️ ${score}%`;
+                suspPill.style.opacity = '0.6';
+                suspPill.title = 'Уровень подозрительности';
+                els.activeEffectsBar.appendChild(suspPill);
+            }
         }
 
         function closeModal() {
@@ -3455,60 +3308,37 @@
 
             initThree();
             
-            // Events
-            let lastClickTime = 0;
-            els.modelContainer.addEventListener('click', (e) => {
-                const now = Date.now();
-                
-                // Basic debounce (уменьшено для мультитача)
-                if (now - lastClickTime < 30) return;
-                
-                // Anti-cheat check с координатами
-                antiCheat.addClick(now, e.clientX, e.clientY);
-                if (!antiCheat.checkPattern()) {
-                    return;
-                }
-                
-                lastClickTime = now;
-                window.haptic('light');
-                handleClick(e);
-            });
+            // ============================================
+            // ИНИЦИАЛИЗАЦИЯ ANTI-AUTOCLICKER
+            // ============================================
             
-            // Поддержка мультитача для мобильных устройств
-            let activeTouches = new Set();
-            
-            els.modelContainer.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                
-                const now = Date.now();
-                
-                // Обрабатываем каждое касание отдельно
-                for (let i = 0; i < e.changedTouches.length; i++) {
-                    const touch = e.changedTouches[i];
-                    activeTouches.add(touch.identifier);
+            antiCheat = new AntiAutoClicker(
+                els.modelContainer,
+                // ✅ Валидный клик
+                (clickData) => {
+                    handleClick({
+                        clientX: clickData.x,
+                        clientY: clickData.y,
+                        target: els.modelContainer
+                    });
+                },
+                // 🚫 Обнаружен читер
+                (cheatData) => {
+                    console.warn('🚨 Cheat detected!', cheatData);
+                    showToast('⚠️ Подозрительная активность обнаружена!', 'error');
                     
-                    // Anti-cheat check с координатами касания
-                    antiCheat.addClick(now, touch.clientX, touch.clientY);
-                    if (!antiCheat.checkPattern()) {
-                        continue;
+                    // Haptic feedback через Telegram API
+                    if (window.Telegram?.WebApp) {
+                        window.Telegram.WebApp.HapticFeedback.notificationOccurred('error');
                     }
-                    
-                    window.haptic('light');
-                    handleClick({ clientX: touch.clientX, clientY: touch.clientY });
                 }
-            }, { passive: false });
+            );
             
-            els.modelContainer.addEventListener('touchend', (e) => {
-                for (let i = 0; i < e.changedTouches.length; i++) {
-                    activeTouches.delete(e.changedTouches[i].identifier);
-                }
-            });
+            // Устанавливаем чувствительность (medium - сбалансированная)
+            antiCheat.setSensitivity('medium');
             
-            els.modelContainer.addEventListener('touchcancel', (e) => {
-                for (let i = 0; i < e.changedTouches.length; i++) {
-                    activeTouches.delete(e.changedTouches[i].identifier);
-                }
-            });
+            // Удаляем старые обработчики событий - AntiAutoClicker сам управляет ими
+            // Events теперь обрабатываются внутри AntiAutoClicker
             
             els.exchangeBtn.addEventListener('click', () => {
                 window.haptic('medium');
