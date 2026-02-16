@@ -3194,100 +3194,6 @@
             // Инициализация Firebase
             initFirebase();
             
-            els = {
-                userAvatar: document.getElementById('userAvatar'),
-                avatarLetter: document.getElementById('avatarLetter'),
-                userName: document.getElementById('userName'),
-                userRank: document.getElementById('userRank'),
-                coinCount: document.getElementById('coinCount'),
-                sizeCount: document.getElementById('sizeCount'),
-                modelSize: document.getElementById('modelSize'),
-                modelCanvas: document.getElementById('modelCanvas'),
-                modelContainer: document.getElementById('modelContainer'),
-                perClickVal: document.getElementById('perClickVal'),
-                exchangeAmount: document.getElementById('exchangeAmount'),
-                exchangeBtn: document.getElementById('exchangeBtn'),
-                exchangeRate: document.querySelector('.exchange-rate'),
-                activeEffectsBar: document.getElementById('activeEffectsBar'),
-                shopGrid: document.getElementById('shopGrid'),
-                shopTimer: document.getElementById('shopTimer'),
-                casesGrid: document.getElementById('casesGrid'),
-
-                activeItems: document.getElementById('activeItems'),
-                noActive: document.getElementById('noActive'),
-                inventoryGrid: document.getElementById('inventoryGrid'),
-                noInventory: document.getElementById('noInventory'),
-                leaderboardList: document.getElementById('leaderboardList'),
-                modalOverlay: document.getElementById('modalOverlay'),
-                modalIcon: document.getElementById('modalIcon'),
-                modalTitle: document.getElementById('modalTitle'),
-                modalDesc: document.getElementById('modalDesc'),
-                modalProfileStats: document.getElementById('modalProfileStats'),
-                modalAchGrid: document.getElementById('modalAchGrid'),
-                modalBtn: document.getElementById('modalBtn'),
-                achInfoDisplay: document.getElementById('achInfoDisplay'),
-                achInfoTitle: document.getElementById('achInfoTitle'),
-                achInfoDesc: document.getElementById('achInfoDesc'),
-                toast: document.getElementById('toast'),
-                achGrid: document.getElementById('achGrid'),
-                achProgress: document.getElementById('achProgress'),
-
-                currentLevel: document.getElementById('currentLevel'),
-                nextLevelBonus: document.getElementById('nextLevelBonus'),
-                levelProgress: document.getElementById('levelProgress'),
-                achInfoBox: document.getElementById('achInfoBox'),
-                upgradeGrid: document.getElementById('upgradeGrid'),
-                dailyRewardContent: document.getElementById('dailyRewardContent'),
-            };
-
-            loadState();
-            
-            // Telegram Init - используем уже объявленную переменную tg
-            if (tg) {
-                tg.ready();
-                tg.expand();
-                try {
-                    tg.enableClosingConfirmation();
-                    tg.setHeaderColor(getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim());
-                    tg.setBackgroundColor(getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim());
-                } catch(e) {}
-                
-                const user = tg.initDataUnsafe?.user;
-                if (user) {
-                    state.userName = user.first_name || 'Игрок';
-                    state.userId = 'tg_' + user.id;
-                    if (els.userName) els.userName.textContent = state.userName;
-                    if (els.avatarLetter) els.avatarLetter.textContent = state.userName.charAt(0);
-                    if (user.photo_url && els.userAvatar) {
-                        const img = document.createElement('img');
-                        img.src = user.photo_url;
-                        els.userAvatar.innerHTML = '';
-                        els.userAvatar.appendChild(img);
-                    }
-                }
-            } else {
-                if (els.userName) els.userName.textContent = 'Игрок';
-            }
-
-            // Haptic feedback helper with fallback
-            window.haptic = (type = 'light') => {
-                const telegram = window.Telegram?.WebApp;
-                if (telegram && telegram.HapticFeedback) {
-                    if (type === 'light') telegram.HapticFeedback.impactOccurred('light');
-                    else if (type === 'medium') telegram.HapticFeedback.impactOccurred('medium');
-                    else if (type === 'heavy') telegram.HapticFeedback.impactOccurred('heavy');
-                    else if (type === 'success') telegram.HapticFeedback.notificationOccurred('success');
-                    else if (type === 'warning') telegram.HapticFeedback.notificationOccurred('warning');
-                    else if (type === 'error') telegram.HapticFeedback.notificationOccurred('error');
-                } else if (window.navigator?.vibrate) {
-                    if (type === 'light') window.navigator.vibrate(10);
-                    else if (type === 'medium') window.navigator.vibrate(20);
-                    else if (type === 'heavy') window.navigator.vibrate(40);
-                }
-            };
-
-            initThree();
-            
             // Anti-autoclicker protection
             const antiCheat = {
                 clicks: [],
@@ -3387,6 +3293,100 @@
                     this.warnings = 0;
                 }
             };
+            
+            els = {
+                userAvatar: document.getElementById('userAvatar'),
+                avatarLetter: document.getElementById('avatarLetter'),
+                userName: document.getElementById('userName'),
+                userRank: document.getElementById('userRank'),
+                coinCount: document.getElementById('coinCount'),
+                sizeCount: document.getElementById('sizeCount'),
+                modelSize: document.getElementById('modelSize'),
+                modelCanvas: document.getElementById('modelCanvas'),
+                modelContainer: document.getElementById('modelContainer'),
+                perClickVal: document.getElementById('perClickVal'),
+                exchangeAmount: document.getElementById('exchangeAmount'),
+                exchangeBtn: document.getElementById('exchangeBtn'),
+                exchangeRate: document.querySelector('.exchange-rate'),
+                activeEffectsBar: document.getElementById('activeEffectsBar'),
+                shopGrid: document.getElementById('shopGrid'),
+                shopTimer: document.getElementById('shopTimer'),
+                casesGrid: document.getElementById('casesGrid'),
+
+                activeItems: document.getElementById('activeItems'),
+                noActive: document.getElementById('noActive'),
+                inventoryGrid: document.getElementById('inventoryGrid'),
+                noInventory: document.getElementById('noInventory'),
+                leaderboardList: document.getElementById('leaderboardList'),
+                modalOverlay: document.getElementById('modalOverlay'),
+                modalIcon: document.getElementById('modalIcon'),
+                modalTitle: document.getElementById('modalTitle'),
+                modalDesc: document.getElementById('modalDesc'),
+                modalProfileStats: document.getElementById('modalProfileStats'),
+                modalAchGrid: document.getElementById('modalAchGrid'),
+                modalBtn: document.getElementById('modalBtn'),
+                achInfoDisplay: document.getElementById('achInfoDisplay'),
+                achInfoTitle: document.getElementById('achInfoTitle'),
+                achInfoDesc: document.getElementById('achInfoDesc'),
+                toast: document.getElementById('toast'),
+                achGrid: document.getElementById('achGrid'),
+                achProgress: document.getElementById('achProgress'),
+
+                currentLevel: document.getElementById('currentLevel'),
+                nextLevelBonus: document.getElementById('nextLevelBonus'),
+                levelProgress: document.getElementById('levelProgress'),
+                achInfoBox: document.getElementById('achInfoBox'),
+                upgradeGrid: document.getElementById('upgradeGrid'),
+                dailyRewardContent: document.getElementById('dailyRewardContent'),
+            };
+
+            loadState();
+            
+            // Telegram Init - используем уже объявленную переменную tg
+            if (tg) {
+                tg.ready();
+                tg.expand();
+                try {
+                    tg.enableClosingConfirmation();
+                    tg.setHeaderColor(getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim());
+                    tg.setBackgroundColor(getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim());
+                } catch(e) {}
+                
+                const user = tg.initDataUnsafe?.user;
+                if (user) {
+                    state.userName = user.first_name || 'Игрок';
+                    state.userId = 'tg_' + user.id;
+                    if (els.userName) els.userName.textContent = state.userName;
+                    if (els.avatarLetter) els.avatarLetter.textContent = state.userName.charAt(0);
+                    if (user.photo_url && els.userAvatar) {
+                        const img = document.createElement('img');
+                        img.src = user.photo_url;
+                        els.userAvatar.innerHTML = '';
+                        els.userAvatar.appendChild(img);
+                    }
+                }
+            } else {
+                if (els.userName) els.userName.textContent = 'Игрок';
+            }
+
+            // Haptic feedback helper with fallback
+            window.haptic = (type = 'light') => {
+                const telegram = window.Telegram?.WebApp;
+                if (telegram && telegram.HapticFeedback) {
+                    if (type === 'light') telegram.HapticFeedback.impactOccurred('light');
+                    else if (type === 'medium') telegram.HapticFeedback.impactOccurred('medium');
+                    else if (type === 'heavy') telegram.HapticFeedback.impactOccurred('heavy');
+                    else if (type === 'success') telegram.HapticFeedback.notificationOccurred('success');
+                    else if (type === 'warning') telegram.HapticFeedback.notificationOccurred('warning');
+                    else if (type === 'error') telegram.HapticFeedback.notificationOccurred('error');
+                } else if (window.navigator?.vibrate) {
+                    if (type === 'light') window.navigator.vibrate(10);
+                    else if (type === 'medium') window.navigator.vibrate(20);
+                    else if (type === 'heavy') window.navigator.vibrate(40);
+                }
+            };
+
+            initThree();
             
             // Events
             let lastClickTime = 0;
