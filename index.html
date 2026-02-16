@@ -1171,81 +1171,126 @@
             dailyRewardStreak: 0
         };
 
-        // Anti-autoclicker protection - умная система на основе статистического анализа
+        // Anti-autoclicker protection - УМНАЯ система с поддержкой мультитача
         let antiCheat = {
             clicks: [],
-            maxClicks: 50,  // Храним больше данных для анализа
-            timeWindow: 2000,  // 2 секунды
+            touchPoints: new Map(), // Отслеживание точек касания
+            maxClicks: 100,
+            timeWindow: 3000,  // 3 секунды для анализа
             warnings: 0,
             isBanned: false,
             lastWarningTime: 0,
+            suspicionScore: 0,  // Накопительный счет подозрительности
             
-            addClick(timestamp) {
-                this.clicks.push(timestamp);
+            addClick(timestamp, x, y) {
+                this.clicks.push({ time: timestamp, x: x || 0, y: y || 0 });
                 if (this.clicks.length > this.maxClicks) {
                     this.clicks.shift();
                 }
             },
             
-            // Вычисление стандартного отклонения интервалов
-            calculateStandardDeviation(intervals) {
-                if (intervals.length < 2) return Infinity;
-                
-                const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-                const variance = intervals.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / intervals.length;
+            // Вычисление стандартного отклонения
+            calculateStdDev(values) {
+                if (values.length < 2) return Infinity;
+                const mean = values.reduce((a, b) => a + b, 0) / values.length;
+                const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
                 return Math.sqrt(variance);
+            },
+            
+            // Проверка разнообразия позиций кликов
+            checkClickPositionVariety(clicks) {
+                if (clicks.length < 10) return true;
+                
+                const positions = clicks.map(c => ({ x: c.x, y: c.y }));
+                const uniquePositions = new Set(positions.map(p => `${Math.floor(p.x/10)},${Math.floor(p.y/10)}`));
+                
+                // Если все клики в одной точке (с точностью 10px) - подозрительно
+                return uniquePositions.size > 1;
             },
             
             checkPattern() {
                 if (this.isBanned) return false;
                 
                 const now = Date.now();
-                this.clicks = this.clicks.filter(t => now - t < this.timeWindow);
+                this.clicks = this.clicks.filter(c => now - c.time < this.timeWindow);
                 
-                // Нужно минимум 15 кликов для анализа
-                if (this.clicks.length < 15) return true;
+                // Нужно минимум 30 кликов для серьезного анализа
+                if (this.clicks.length < 30) {
+                    this.suspicionScore = Math.max(0, this.suspicionScore - 1); // Уменьшаем подозрительность
+                    return true;
+                }
                 
-                // Вычисляем интервалы между кликами
+                // Вычисляем интервалы
                 const intervals = [];
                 for (let i = 1; i < this.clicks.length; i++) {
-                    intervals.push(this.clicks[i] - this.clicks[i-1]);
+                    intervals.push(this.clicks[i].time - this.clicks[i-1].time);
                 }
                 
-                // Вычисляем стандартное отклонение
-                const stdDev = this.calculateStandardDeviation(intervals);
+                // 1. Проверка стандартного отклонения
+                const stdDev = this.calculateStdDev(intervals);
                 const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-                
-                // Коэффициент вариации (CV) = стандартное отклонение / среднее
                 const cv = stdDev / mean;
                 
-                // Человек имеет CV > 0.15 (вариативность 15%+)
-                // Автокликер имеет CV < 0.10 (слишком стабильные интервалы)
-                if (cv < 0.10 && this.clicks.length >= 20) {
-                    this.handleSuspicious(`Подозрительная стабильность (CV: ${cv.toFixed(3)})`);
-                    return false;
+                let suspicionPoints = 0;
+                
+                // Коэффициент вариации < 0.08 = очень подозрительно
+                if (cv < 0.08) {
+                    suspicionPoints += 3;
+                } else if (cv < 0.12) {
+                    suspicionPoints += 1;
                 }
                 
-                // Проверка на нечеловеческую скорость (более 25 CPS)
+                // 2. Проверка на нечеловеческую скорость (более 30 CPS устойчиво)
                 const cps = this.clicks.length / (this.timeWindow / 1000);
-                if (cps > 25) {
-                    this.handleSuspicious(`Слишком высокий CPS: ${cps.toFixed(1)}`);
-                    return false;
+                if (cps > 30) {
+                    suspicionPoints += 2;
                 }
                 
-                // Проверка на идентичные интервалы (точность 2ms)
-                let identicalPairs = 0;
+                // 3. Проверка идентичных интервалов (точность 1ms)
+                let perfectMatches = 0;
                 for (let i = 0; i < intervals.length - 1; i++) {
                     for (let j = i + 1; j < intervals.length; j++) {
-                        if (Math.abs(intervals[i] - intervals[j]) < 2) {
-                            identicalPairs++;
+                        if (Math.abs(intervals[i] - intervals[j]) <= 1) {
+                            perfectMatches++;
                         }
                     }
                 }
                 
-                // Если более 40% интервалов идентичны - это бот
-                const identicalRatio = identicalPairs / (intervals.length * (intervals.length - 1) / 2);
-                if (identicalRatio > 0.4 && this.clicks.length >= 20) {
-                    this.handleSuspicious(`Слишком много идентичных интервалов: ${(identicalRatio * 100).toFixed(1)}%`);
+                const matchRatio = perfectMatches / (intervals.length * (intervals.length - 1) / 2);
+                if (matchRatio > 0.5) {
+                    suspicionPoints += 3;
+                } else if (matchRatio > 0.3) {
+                    suspicionPoints += 1;
+                }
+                
+                // 4. Проверка разнообразия позиций
+                if (!this.checkClickPositionVariety(this.clicks)) {
+                    suspicionPoints += 2;
+                }
+                
+                // 5. Проверка на "идеальные" интервалы (кратные 10ms, 50ms, 100ms)
+                const roundIntervals = intervals.filter(i => i % 10 === 0 || i % 50 === 0 || i % 100 === 0);
+                if (roundIntervals.length / intervals.length > 0.7) {
+                    suspicionPoints += 2;
+                }
+                
+                // Накопительная система подозрительности
+                this.suspicionScore += suspicionPoints;
+                
+                // Естественное снижение подозрительности со временем
+                if (suspicionPoints === 0) {
+                    this.suspicionScore = Math.max(0, this.suspicionScore - 2);
+                }
+                
+                // Логирование для отладки
+                if (suspicionPoints > 0) {
+                    console.log(`[AntiCheat] CV: ${cv.toFixed(3)}, CPS: ${cps.toFixed(1)}, Match: ${(matchRatio*100).toFixed(1)}%, Score: ${this.suspicionScore}`);
+                }
+                
+                // Только при высоком счете подозрительности выдаем предупреждение
+                if (this.suspicionScore >= 15) {
+                    this.handleSuspicious(`Подозрительная активность (Score: ${this.suspicionScore})`);
+                    this.suspicionScore = 10; // Сбрасываем, но не до нуля
                     return false;
                 }
                 
@@ -1255,18 +1300,19 @@
             handleSuspicious(reason) {
                 const now = Date.now();
                 
-                // Не спамим предупреждениями
-                if (now - this.lastWarningTime < 8000) return;
+                // Не спамим предупреждениями (10 секунд между ними)
+                if (now - this.lastWarningTime < 10000) return;
                 
                 this.warnings++;
                 this.lastWarningTime = now;
                 
                 console.log(`[AntiCheat] ${reason}`);
                 
-                if (this.warnings >= 3) {
+                // Только после 4 предупреждений - бан
+                if (this.warnings >= 4) {
                     this.ban();
                 } else {
-                    showToast(`⚠️ Предупреждение ${this.warnings}/3`, 'error');
+                    showToast(`⚠️ Подозрительная активность ${this.warnings}/4`, 'error');
                 }
             },
             
@@ -1280,13 +1326,15 @@
                     this.isBanned = false;
                     this.warnings = 0;
                     this.clicks = [];
+                    this.suspicionScore = 0;
                     showToast('✅ Блокировка снята', 'success');
-                }, 120000); // 2 minutes
+                }, 120000);
             },
             
             reset() {
                 this.clicks = [];
                 this.warnings = 0;
+                this.suspicionScore = 0;
             }
         };
 
@@ -3412,11 +3460,11 @@
             els.modelContainer.addEventListener('click', (e) => {
                 const now = Date.now();
                 
-                // Basic debounce
-                if (now - lastClickTime < 50) return;
+                // Basic debounce (уменьшено для мультитача)
+                if (now - lastClickTime < 30) return;
                 
-                // Anti-cheat check
-                antiCheat.addClick(now);
+                // Anti-cheat check с координатами
+                antiCheat.addClick(now, e.clientX, e.clientY);
                 if (!antiCheat.checkPattern()) {
                     return;
                 }
@@ -3426,35 +3474,39 @@
                 handleClick(e);
             });
             
-            // Additional touch event protection for mobile autoclickers
-            let touchStartTime = 0;
-            let touchCount = 0;
-            let lastTouchTime = 0;
+            // Поддержка мультитача для мобильных устройств
+            let activeTouches = new Set();
             
             els.modelContainer.addEventListener('touchstart', (e) => {
-                touchStartTime = Date.now();
+                e.preventDefault();
                 
-                // Check for rapid touch spam
-                if (touchStartTime - lastTouchTime < 40) {
-                    touchCount++;
-                    if (touchCount > 8) {
-                        antiCheat.handleSuspicious('Быстрые тапы');
-                        e.preventDefault();
-                        return false;
+                const now = Date.now();
+                
+                // Обрабатываем каждое касание отдельно
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    const touch = e.changedTouches[i];
+                    activeTouches.add(touch.identifier);
+                    
+                    // Anti-cheat check с координатами касания
+                    antiCheat.addClick(now, touch.clientX, touch.clientY);
+                    if (!antiCheat.checkPattern()) {
+                        continue;
                     }
-                } else {
-                    touchCount = 0;
+                    
+                    window.haptic('light');
+                    handleClick({ clientX: touch.clientX, clientY: touch.clientY });
                 }
-                
-                lastTouchTime = touchStartTime;
             }, { passive: false });
             
             els.modelContainer.addEventListener('touchend', (e) => {
-                const touchDuration = Date.now() - touchStartTime;
-                
-                // Detect instant taps (likely bot)
-                if (touchDuration < 10) {
-                    antiCheat.handleSuspicious('Мгновенные тапы');
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    activeTouches.delete(e.changedTouches[i].identifier);
+                }
+            });
+            
+            els.modelContainer.addEventListener('touchcancel', (e) => {
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    activeTouches.delete(e.changedTouches[i].identifier);
                 }
             });
             
