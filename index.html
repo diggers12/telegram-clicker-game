@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>СИСЯ КЛИКЕР</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+</head><body>
+    <canvas id="bgCanvas"></canvas>
+    <div class="bg-gradient"></div>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="user-section">
+                <div class="user-avatar" id="userAvatar"><span id="avatarLetter">U</span></div>
+                <div class="user-info">
+                    <h2 id="userName">Загрузка...</h2>
+                    <span id="userRank">Ранг: --</span>
+                </div>
+            </div>
+            <div class="stats-row">
+                <div class="stat-badge coins"><span class="icon">💰</span><span id="coinCount">0</span></div>
+                <div class="stat-badge size"><span class="icon">📏</span><span id="sizeCount">0</span></div>
+                <div class="stat-badge stars"><span class="icon">⭐</span><span id="starCount">0</span></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <!-- Game -->
+        <section class="tab-content active" id="gameTab">
+            <div class="game-section">
+                <div id="activeEffectsBar" style="min-height: 24px; margin-bottom: 8px;"></div>
+                
+                <div class="model-container" id="modelContainer">
+                    <canvas class="model-canvas" id="modelCanvas"></canvas>
+                    <div class="size-indicator">
+                        Размер: <span id="modelSize">0</span>
+                    </div>
+                </div>
+
+                <div class="click-controls">
+                    <div class="per-click">За клик: <strong id="perClickVal">+1</strong></div>
+
+                    <div class="exchange-section">
+                        <div class="exchange-title">Обменять размер на монеты</div>
+                        <div class="exchange-row">
+                            <input type="number" class="exchange-input" id="exchangeAmount" placeholder="Размер" min="1" value="10">
+                            <button class="exchange-btn" id="exchangeBtn">Обмен</button>
+                        </div>
+                        <div class="exchange-rate">Курс: 1 ед. размера = 3 монеты</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upgrades -->
+        <section class="tab-content" id="upgradeTab">
+            <div class="section-content">
+                <div class="section-header">
+                    <h2 class="section-title">Прокачка</h2>
+                </div>
+                <div class="upgrade-grid" id="upgradeGrid"></div>
+            </div>
+        </section>
+
+        <!-- Shop -->
+        <section class="tab-content" id="shopTab">
+            <div class="section-content">
+                <div class="section-header">
+                    <h2 class="section-title">Магазин</h2>
+                    <span class="shop-timer" id="shopTimer">--:--:--</span>
+                </div>
+                <div class="shop-grid" id="shopGrid"></div>
+            </div>
+        </section>
+
+        <!-- Cases -->
+        <section class="tab-content" id="casesTab">
+            <div class="section-content">
+                <div class="section-header"><h2 class="section-title">Кейсы</h2></div>
+                <div class="cases-grid" id="casesGrid"></div>
+            </div>
+        </section>
+
+        <!-- Top -->
+        <section class="tab-content" id="topTab">
+            <div class="section-content">
+                <div class="section-header"><h2 class="section-title">Топ игроков</h2></div>
+                <div class="leaderboard-list" id="leaderboardList"></div>
+            </div>
+        </section>
+
+        <!-- Achievements -->
+        <section class="tab-content" id="achTab">
+            <div class="section-content">
+                <div class="section-header">
+                    <h2 class="section-title">Достижения</h2>
+                    <span id="achProgress">0/0</span>
+                </div>
+                <div class="ach-grid" id="achGrid"></div>
+                <div id="achInfoBox" class="ach-info-box empty">
+                    Нажмите на достижение, чтобы узнать условие
+                </div>
+            </div>
+        </section>
+
+        <!-- Inventory -->
+        <section class="tab-content" id="inventoryTab">
+            <div class="section-content">
+                <div class="inventory-section">
+                    <div class="inv-section-title">Активные эффекты</div>
+                    <div class="inventory-grid" id="activeItems"></div>
+                    <div class="empty-text" id="noActive">Нет активных эффектов</div>
+                </div>
+                <div class="inventory-section">
+                    <div class="inv-section-title">Инвентарь</div>
+                    <div class="inventory-grid" id="inventoryGrid"></div>
+                    <div class="empty-text" id="noInventory">Инвентарь пуст</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Daily Reward -->
+        <section class="tab-content" id="dailyTab">
+            <div class="section-content">
+                <div class="section-header">
+                    <h2 class="section-title">🎁 Ежедневная награда</h2>
+                </div>
+                <div id="dailyRewardContent"></div>
+            </div>
+        </section>
+    </main>
+
+    <nav class="bottom-nav">
+        <div class="nav-items">
+            <button class="nav-item active" data-tab="gameTab">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                <span class="nav-label">Игра</span>
+            </button>
+            <button class="nav-item" data-tab="upgradeTab">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                <span class="nav-label">Прокачка</span>
+            </button>
+            <button class="nav-item" data-tab="shopTab">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                <span class="nav-label">Магазин</span>
+            </button>
+            <button class="nav-item" data-tab="casesTab">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+                <span class="nav-label">Кейсы</span>
+            </button>
+
+            <button class="nav-item" data-tab="topTab">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M17 3H7l-2 8h14l-2-8z"/><circle cx="12" cy="11" r="2"/></svg>
+                <span class="nav-label">Топ</span>
+            </button>
+
+            <button class="nav-item" data-tab="achTab">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+                <span class="nav-label">Ачивки</span>
+            </button>
+            <button class="nav-item" data-tab="inventoryTab">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                <span class="nav-label">Сумка</span>
+            </button>
+            <button class="nav-item" data-tab="dailyTab">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span class="nav-label">Награда</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <div class="modal-icon" id="modalIcon"></div>
+            <h3 class="modal-title" id="modalTitle">Название</h3>
+            <p class="modal-desc" id="modalDesc">Описание</p>
+            <div id="modalProfileStats"></div>
+            <div id="modalAchGrid"></div>
+            <div class="ach-info-display" id="achInfoDisplay" style="display:none;">
+                <div class="ach-info-title-modal" id="achInfoTitle"></div>
+                <div class="ach-info-desc-modal" id="achInfoDesc"></div>
+            </div>
+            <button class="modal-btn" id="modalBtn">OK</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- Anti-AutoClicker System -->
+    <script src="anti-autoclicker.js"></script>
+
+    <script type="module" src="game.js"></script>
+</body>
+</html>
