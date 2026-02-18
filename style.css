@@ -171,6 +171,7 @@ body {
     width: 100%;
     max-width: 380px;
     height: 420px;
+    margin: 0 auto; /* Explicit centering */
     border-radius: 40px;
     background: radial-gradient(circle at 50% 30%, #1a1a24 0%, #050508 80%);
     border: 1px solid var(--border);
@@ -730,6 +731,37 @@ body {
 .active-effect.buff { border-color: var(--success); color: var(--success); }
 .active-effect.debuff { border-color: var(--danger); color: var(--danger); }
 .active-effect .timer { font-size: 10px; opacity: 0.8; }
+
+.float-num {
+    position: fixed; 
+    pointer-events: none; 
+    z-index: 1000;
+    font-weight: 900; 
+    font-size: 28px;
+    color: var(--text-primary);
+    animation: floatUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    text-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+@keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(0.8); }
+    50% { opacity: 1; transform: translateY(-40px) scale(1.1); }
+    100% { opacity: 0; transform: translateY(-80px) scale(1.0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 77, 141, 0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(255, 77, 141, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 77, 141, 0); }
+}
+
+.pulse {
+    animation: pulse 1.5s infinite;
+}
 
 .floating-text {
     position: fixed; pointer-events: none; z-index: 1000;
