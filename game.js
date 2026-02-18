@@ -515,12 +515,12 @@ const ACHIEVEMENTS = [
 
 const SHOP_DB = [
     { id: 'mult2', name: 'Усилитель x2', desc: 'Двойной рост на 10 мин', icon: '2x', price: 5000, color: '#4ade80', type: 'boost', effect: { type: 'multiply', value: 2 }, duration: 600000 },
-    { id: 'shield', name: 'Щит', desc: 'Блок дебаффа', icon: 'S', price: 10000, color: '#60a5fa', type: 'shield', effect: { type: 'shield', value: 1 }, duration: 0 },
+    { id: 'shield', name: 'Щит', desc: 'Блок дебаффа', icon: '🛡️', price: 10000, color: '#60a5fa', type: 'shield', effect: { type: 'shield', value: 1 }, duration: 0 },
     { id: 'size100', name: 'Размер +100', desc: 'Мгновенно', icon: '+', price: 15000, color: '#ff4d8d', type: 'instant', effect: { type: 'instantSize', value: 100 }, duration: 0 },
-    { id: 'auto', name: 'Авто-рост', desc: '1 клик/сек на 10 мин', icon: 'A', price: 30000, color: '#b366ff', type: 'ability', effect: { type: 'autoclick', value: 1 }, duration: 600000 },
+    { id: 'auto', name: 'Авто-рост', desc: '1 клик/сек на 10 мин', icon: '🤖', price: 30000, color: '#b366ff', type: 'ability', effect: { type: 'autoclick', value: 1 }, duration: 600000 },
     { id: 'mult5', name: 'Усилитель x5', desc: 'Мощный буст на 5 мин', icon: '5x', price: 80000, color: '#fbbf24', type: 'boost', effect: { type: 'multiply', value: 5 }, duration: 300000 },
-    { id: 'auto2', name: 'Авто-рост PRO', desc: '2 клика/сек на 10 мин', icon: 'AA', price: 100000, color: '#b366ff', type: 'ability', effect: { type: 'autoclick', value: 2 }, duration: 600000 },
-    { id: 'frenzy', name: 'Френзи x10', desc: 'Бешеный рост на 3 мин', icon: 'F', price: 200000, color: '#ff4d8d', type: 'boost', effect: { type: 'multiply', value: 10 }, duration: 180000 },
+    { id: 'auto2', name: 'Авто-рост PRO', desc: '2 клика/сек на 10 мин', icon: '⚡', price: 100000, color: '#b366ff', type: 'ability', effect: { type: 'autoclick', value: 2 }, duration: 600000 },
+    { id: 'frenzy', name: 'Френзи x10', desc: 'Бешеный рост на 3 мин', icon: '🌪️', price: 200000, color: '#ff4d8d', type: 'boost', effect: { type: 'multiply', value: 10 }, duration: 180000 },
 ];
 
 const CASES = [
@@ -533,20 +533,20 @@ const CASE_REWARDS = [
     // Common награды (для кейса за 1 звезду) - слабые бусты
     { id: 'mult2_1min', name: 'x2 на 1 мин', icon: '2x', rarity: 'common', weight: 30, type: 'boost', effect: { type: 'multiply', value: 2 }, duration: 60000 },
     { id: 'mult1_5_3min', name: 'x1.5 на 3 мин', icon: '1.5x', rarity: 'common', weight: 25, type: 'boost', effect: { type: 'multiply', value: 1.5 }, duration: 180000 },
-    { id: 'auto1_2min', name: 'Авто-клик 1 на 2 мин', icon: 'A', rarity: 'common', weight: 20, type: 'boost', effect: { type: 'autoclick', value: 1 }, duration: 120000 },
+    { id: 'auto1_2min', name: 'Авто-клик 1 на 2 мин', icon: '🤖', rarity: 'common', weight: 20, type: 'boost', effect: { type: 'autoclick', value: 1 }, duration: 120000 },
     { id: 'empty_common', name: 'Пусто', icon: '💨', rarity: 'common', weight: 25, type: 'empty', effect: {} },
     
     // Rare награды (для кейса за 2 звезды) - средние бусты
     { id: 'mult3_3min', name: 'x3 на 3 мин', icon: '3x', rarity: 'rare', weight: 25, type: 'boost', effect: { type: 'multiply', value: 3 }, duration: 180000 },
     { id: 'mult2_5min', name: 'x2 на 5 мин', icon: '2x', rarity: 'rare', weight: 22, type: 'boost', effect: { type: 'multiply', value: 2 }, duration: 300000 },
-    { id: 'auto2_3min', name: 'Авто-клик 2 на 3 мин', icon: 'AA', rarity: 'rare', weight: 18, type: 'boost', effect: { type: 'autoclick', value: 2 }, duration: 180000 },
+    { id: 'auto2_3min', name: 'Авто-клик 2 на 3 мин', icon: '⚡', rarity: 'rare', weight: 18, type: 'boost', effect: { type: 'autoclick', value: 2 }, duration: 180000 },
     { id: 'crit_5min', name: 'Крит 20% на 5 мин', icon: '💥', rarity: 'rare', weight: 15, type: 'boost', effect: { type: 'critBoost', value: 0.2 }, duration: 300000 },
     { id: 'empty_rare', name: 'Пусто', icon: '💨', rarity: 'rare', weight: 20, type: 'empty', effect: {} },
     
     // Epic награды (для кейса за 3 звезды) - сильные бусты
     { id: 'mult5_5min', name: 'x5 на 5 мин', icon: '5x', rarity: 'epic', weight: 22, type: 'boost', effect: { type: 'multiply', value: 5 }, duration: 300000 },
     { id: 'mult3_10min', name: 'x3 на 10 мин', icon: '3x', rarity: 'epic', weight: 18, type: 'boost', effect: { type: 'multiply', value: 3 }, duration: 600000 },
-    { id: 'auto3_5min', name: 'Авто-клик 3 на 5 мин', icon: 'AAA', rarity: 'epic', weight: 18, type: 'boost', effect: { type: 'autoclick', value: 3 }, duration: 300000 },
+    { id: 'auto3_5min', name: 'Авто-клик 3 на 5 мин', icon: '⚡', rarity: 'epic', weight: 18, type: 'boost', effect: { type: 'autoclick', value: 3 }, duration: 300000 },
     { id: 'auto5_3min', name: 'Авто-клик 5 на 3 мин', icon: '⚡', rarity: 'epic', weight: 15, type: 'boost', effect: { type: 'autoclick', value: 5 }, duration: 180000 },
     { id: 'crit_30_5min', name: 'Крит 30% на 5 мин', icon: '💥', rarity: 'epic', weight: 12, type: 'boost', effect: { type: 'critBoost', value: 0.3 }, duration: 300000 },
     { id: 'empty_epic', name: 'Пусто', icon: '💨', rarity: 'epic', weight: 15, type: 'empty', effect: {} },
@@ -947,6 +947,17 @@ function initThree() {
     
     // Use a small delay to ensure container is rendered and has dimensions
     setTimeout(() => {
+        const updateSize = () => {
+            if (!container || !camera || !renderer) return;
+            const rect = container.getBoundingClientRect();
+            const width = rect.width || 350;
+            const height = rect.height || 380;
+            
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        };
+
         const rect = container.getBoundingClientRect();
         const width = rect.width || 350;
         const height = rect.height || 380;
@@ -965,20 +976,7 @@ function initThree() {
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-        // Post-processing (Disabled to remove glow)
-        /*
-        const renderScene = new RenderPass(scene, camera);
-        
-        const bloomPass = new UnrealBloomPass(new THREE.Vector2(width, height), 1.5, 0.4, 0.85);
-        bloomPass.threshold = 0.2;
-        bloomPass.strength = 0.8;
-        bloomPass.radius = 0.5;
-
-        composer = new EffectComposer(renderer);
-        composer.addPass(renderScene);
-        composer.addPass(bloomPass);
-        */
-        composer = null; // Ensure composer is null so we use standard renderer
+        composer = null; 
 
         const ambient = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambient);
@@ -1004,11 +1002,24 @@ function initThree() {
 
         createBreasts();
         animate();
+
+        // Handle resize with ResizeObserver for better responsiveness
+        const resizeObserver = new ResizeObserver(() => {
+            updateSize();
+        });
+        resizeObserver.observe(container);
+        
+        // Also listen to window resize as backup
+        window.addEventListener('resize', updateSize);
+        
+        // Initial update
+        updateSize();
     }, 100);
 }
 
 function createBreasts() {
     breastGroup = new THREE.Group();
+    breastGroup.position.set(0, 0, 0); // Ensure centered
 
     const skinMat = new THREE.MeshStandardMaterial({
         color: 0xffdbd0,
@@ -1366,27 +1377,41 @@ function handleClick(e) {
 function createFloatingNum(amount, e, isCrit = false, isLucky = false) {
     const num = document.createElement('div');
     num.className = 'float-num';
-    let prefix = '+';
-    if (isCrit) prefix = 'КРИТ! +';
-    if (isLucky) prefix = '⭐ УДАЧА! +';
-    num.textContent = prefix + amount;
     
+    // Формируем красивый текст
+    let content = `<span>+${amount}</span>`;
+    if (isCrit) content = `<span style="font-size: 1.2em">💥</span> <span>+${amount}</span>`;
+    if (isLucky) content = `<span style="font-size: 1.2em">⭐</span> <span>+${amount}</span>`;
+    
+    num.innerHTML = content;
+    
+    // Специальные стили для особых кликов
     if (isCrit) {
-        num.style.color = '#fbbf24';
-        num.style.textShadow = '0 0 15px rgba(251, 191, 36, 0.8)';
-    }
-    if (isLucky) {
-        num.style.color = '#00ffff';
-        num.style.textShadow = '0 0 15px rgba(0, 255, 255, 0.8)';
+        num.style.color = '#fbbf24'; // Gold
+        num.style.fontSize = '36px';
+        num.style.zIndex = '1001';
+        num.style.textShadow = '0 0 20px rgba(251, 191, 36, 0.8)';
+    } else if (isLucky) {
+        num.style.color = '#00ffff'; // Cyan
+        num.style.fontSize = '36px';
+        num.style.zIndex = '1002';
+        num.style.textShadow = '0 0 20px rgba(0, 255, 255, 0.8)';
+    } else {
+        // Обычный клик - случайный пастельный цвет для разнообразия
+        const colors = ['#fff', '#fce7f3', '#e0e7ff', '#d1fae5'];
+        num.style.color = colors[Math.floor(Math.random() * colors.length)];
     }
     
     const rect = els.modelContainer.getBoundingClientRect();
     // Use click coordinates if available, otherwise center
     const x = e && e.clientX ? e.clientX : rect.left + rect.width / 2;
-    const y = e && e.clientY ? e.clientY : rect.top + rect.height * 0.3;
+    const y = e && e.clientY ? e.clientY : rect.top + rect.height * 0.4;
     
-    num.style.left = x + (Math.random() - 0.5) * 60 - 20 + 'px';
-    num.style.top = y - 40 + 'px';
+    // Random position offset
+    const randomX = (Math.random() - 0.5) * 60;
+    
+    num.style.left = `${x + randomX}px`;
+    num.style.top = `${y - 40}px`;
     
     document.body.appendChild(num);
     setTimeout(() => num.remove(), 800);
@@ -1716,16 +1741,6 @@ function claimReward(reward, caseData = null) {
         }
     }
 
-    // Проверяем, есть ли уже активный буст того же типа
-    if (reward.effect && reward.effect.type === 'multiply' && reward.duration) {
-        const existingBoost = state.activeEffects.find(e =>
-            e.effect.type === 'multiply' && e.endTime > Date.now()
-        );
-        if (existingBoost) {
-            showToast(`⚠️ Уже активен буст x${existingBoost.effect.value}! Будет использован сильнейший.`, 'warning');
-        }
-    }
-
     // Пусто - ничего не получаем
     if (reward.type === 'empty') {
         showToast('💨 Пусто! Ничего не получено.', 'error');
@@ -1760,31 +1775,26 @@ function claimReward(reward, caseData = null) {
             state.activeEffects.push({ ...reward, endTime: Date.now() + reward.duration });
         }
     } else if (reward.type === 'boost' && reward.duration) {
-        // Обработка бустов
-        if (reward.effect.type === 'multiply') {
-            const existingBoost = state.activeEffects.find(e =>
-                e.effect.type === 'multiply' && e.endTime > Date.now()
-            );
-            if (existingBoost && existingBoost.effect.value >= reward.effect.value) {
-                showToast(`⚠️ Уже активен буст x${existingBoost.effect.value}!`, 'warning');
-            } else {
-                if (existingBoost) {
-                    state.activeEffects = state.activeEffects.filter(e =>
-                        !(e.effect.type === 'multiply' && e.endTime > Date.now())
-                    );
-                }
-                state.activeEffects.push({ ...reward, endTime: Date.now() + reward.duration });
-                showToast(`🚀 ${reward.name} активирован!`, 'success');
-            }
-        } else if (reward.effect.type === 'autoclick') {
-            state.activeEffects.push({ ...reward, endTime: Date.now() + reward.duration });
-            showToast(`⚙️ ${reward.name} активирован!`, 'success');
-        } else if (reward.effect.type === 'critBoost') {
-            state.activeEffects.push({ ...reward, endTime: Date.now() + reward.duration });
-            showToast(`💥 ${reward.name} активирован!`, 'success');
+        // Все бусты отправляем в инвентарь, не активируем сразу
+        state.inventory.push({ ...reward, obtainedAt: Date.now() });
+        showToast(`🎒 ${reward.name} добавлен в инвентарь!`, 'success');
+        
+        // Визуальное подтверждение
+        const btn = document.querySelector('.nav-item[data-tab="inventoryTab"]');
+        if (btn) {
+            btn.classList.add('pulse');
+            setTimeout(() => btn.classList.remove('pulse'), 1500);
         }
     } else {
         state.inventory.push({ ...reward, obtainedAt: Date.now() });
+        showToast(`🎒 ${reward.name} добавлен в инвентарь!`, 'success');
+
+        // Визуальное подтверждение
+        const btn = document.querySelector('.nav-item[data-tab="inventoryTab"]');
+        if (btn) {
+            btn.classList.add('pulse');
+            setTimeout(() => btn.classList.remove('pulse'), 1500);
+        }
     }
 
     updateUI();
@@ -2094,7 +2104,7 @@ function renderActiveEffectsBar() {
     state.activeEffects.filter(e => e.endTime > now).forEach(eff => {
         const pill = document.createElement('div');
         pill.className = `effect-pill ${eff.type === 'debuff' ? 'debuff' : 'buff'}`;
-        pill.textContent = `${eff.icon} ${formatTime(Math.max(0, eff.endTime - now))}`;
+        pill.textContent = `${eff.icon} ${eff.name} ${formatTime(Math.max(0, eff.endTime - now))}`;
         els.activeEffectsBar.appendChild(pill);
     });
 }
