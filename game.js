@@ -1926,8 +1926,11 @@ async function renderLeaderboard() {
             <div class="lb-avatar">${avatarContent}</div>
             <div class="lb-info">
                 <div class="lb-name ${player.isCurrentUser ? 'you' : ''}">${player.name}${player.isCurrentUser ? ' (Ты)' : ''}</div>
+                <div class="lb-stats">
+                    <span>📏 ${player.size.toLocaleString()}</span>
+                    <span>🏆 ${(player.achievements || []).length}</span>
+                </div>
             </div>
-            <div class="lb-value">${player.size.toLocaleString()}<span>${(player.achievements || []).length} ачивок</span></div>
         `;
         
         div.addEventListener('click', () => {
